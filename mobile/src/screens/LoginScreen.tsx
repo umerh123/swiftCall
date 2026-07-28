@@ -14,10 +14,10 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme';
+import { TelnyxVoipClient } from '@telnyx/react-voice-commons-sdk';
 import * as api from '../api/client';
 import { getServerUrl, setServerUrl, setToken, setUser, getUser, getToken } from '../storage/settings';
-import { loginToVoip } from '../voip/client';
-import { getFcmToken, requestMicrophonePermission, requestNotificationPermission } from '../push/push';
+import { bootVoip } from '../voip/boot';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -33,29 +33,20 @@ export default function LoginScreen({ navigation }: Props) {
       const [url, token, user] = await Promise.all([getServerUrl(), getToken(), getUser()]);
       if (url) setServerUrlField(url);
       if (token && user) {
-        // Already signed in from a previous session — skip straight in.
-        await bootVoip();
+        // If the app was launched by tapping an incoming-call notification,
+        // Telnyx's native layer is already logging in to handle that call —
+        // calling bootVoip() here too would be the exact "double login"
+        // race their SDK docs warn about, so skip it in that one case.
+        const launchedFromPush = await TelnyxVoipClient.isLaunchedFromPushNotification();
+        if (!launchedFromPush) {
+          await bootVoip();
+        }
         navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         return;
       }
       setLoading(false);
     })();
   }, []);
-
-  // Wrapped as a whole, deliberately: nothing in here — permissions,
-  // FCM, the VoIP login itself — is allowed to stop sign-in from
-  // finishing and landing on the main screen. A setup problem here
-  // should mean "calling doesn't work yet", never "the app won't open".
-  async function bootVoip() {
-    try {
-      await requestNotificationPermission();
-      await requestMicrophonePermission();
-      const fcmToken = await getFcmToken();
-      await loginToVoip(fcmToken ?? undefined);
-    } catch (e) {
-      console.warn('VoIP boot failed:', e);
-    }
-  }
 
   async function onSubmit() {
     const url = serverUrl.trim().replace(/\/+$/, '');
