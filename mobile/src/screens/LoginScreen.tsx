@@ -17,7 +17,7 @@ import { colors } from '../theme';
 import * as api from '../api/client';
 import { getServerUrl, setServerUrl, setToken, setUser, getUser, getToken } from '../storage/settings';
 import { loginToVoip } from '../voip/client';
-import { getFcmToken, requestNotificationPermission } from '../push/push';
+import { getFcmToken, requestMicrophonePermission, requestNotificationPermission } from '../push/push';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -42,15 +42,18 @@ export default function LoginScreen({ navigation }: Props) {
     })();
   }, []);
 
+  // Wrapped as a whole, deliberately: nothing in here — permissions,
+  // FCM, the VoIP login itself — is allowed to stop sign-in from
+  // finishing and landing on the main screen. A setup problem here
+  // should mean "calling doesn't work yet", never "the app won't open".
   async function bootVoip() {
-    await requestNotificationPermission();
-    const fcmToken = await getFcmToken();
     try {
+      await requestNotificationPermission();
+      await requestMicrophonePermission();
+      const fcmToken = await getFcmToken();
       await loginToVoip(fcmToken ?? undefined);
     } catch (e) {
-      // Non-fatal — the person can still use messages/contacts even if
-      // their calling line isn't configured yet.
-      console.warn('VoIP login failed:', e);
+      console.warn('VoIP boot failed:', e);
     }
   }
 

@@ -10,6 +10,16 @@ export async function requestNotificationPermission(): Promise<void> {
   }
 }
 
+/** The manifest declaring RECORD_AUDIO isn't enough on its own — Android
+ *  still requires this runtime prompt before any code touches the
+ *  microphone. Without it, the native WebRTC layer Telnyx's SDK starts
+ *  during login can hard-crash the app instead of just failing softly. */
+export async function requestMicrophonePermission(): Promise<void> {
+  if (Platform.OS === 'android') {
+    await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+  }
+}
+
 /** Gets this device's FCM token and hands it to our own backend (for
  *  SMS/voicemail pushes) — Telnyx's own copy of the same token is
  *  registered separately, at login, via voip/client.ts. */
