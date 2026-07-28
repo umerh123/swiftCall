@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "254465493484",
+    "project_id": "swiftcall-b56e3",
+    "storage_bucket": "swiftcall-b56e3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254465493484:android:1951a3baa1403f247518c9",
+        "android_client_info": {
+          "package_name": "com.swiftcall.dialer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwP59f3O9mFtBwet0IlXfedHwmYw-pdTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
