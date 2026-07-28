@@ -1,0 +1,64 @@
+name: Build Android APK
+
+# Builds an installable, debug-signed release APK on GitHub's own runners —
+# this sandbox's build environment can't reach Google's servers to install
+# the Android SDK, so this is what actually produces the APK.
+#
+# Requires mobile/android/app/google-services.json to already be committed
+# (download it from your Firebase project — see ../../MOBILE_SETUP.md).
+# Without it, this workflow fails fast with a clear message instead of a
+# confusing Gradle error.
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/build-android.yml'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check google-services.json is present
+        run: |
+          if [ ! -f android/app/google-services.json ]; then
+            echo "::error::mobile/android/app/google-services.json is missing." \
+                 "Download it from your Firebase project (Project settings > General > Your apps)" \
+                 "and commit it at that exact path — see MOBILE_SETUP.md step 1."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build release APK
+        working-directory: mobile/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: swiftcall-dialer-android
+          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error

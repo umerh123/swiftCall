@@ -98,6 +98,28 @@ That's it for Telnyx — incoming calls now wake the app on their own.
 
 ## 4. Build the app
 
+### Option A — let GitHub build it for you (no Android Studio needed)
+
+`.github/workflows/build-android.yml` is already set up in this repo. Once
+`mobile/android/app/google-services.json` is committed and pushed (step 1.3 —
+note it's `.gitignore`d by default, so add it explicitly:
+`git add -f mobile/android/app/google-services.json`), GitHub automatically
+builds an installable APK on every push that touches `mobile/`.
+
+To get the file:
+
+1. Push your commit (with `google-services.json` included) to GitHub.
+2. Go to the repo's **Actions** tab → **Build Android APK** → the latest run.
+3. Once it finishes (a few minutes), scroll to **Artifacts** → download
+   **swiftcall-dialer-android** → unzip it → you have `app-release.apk`.
+4. Copy that to your phone and install it (allow "install from unknown
+   sources" once, since this isn't going through the Play Store).
+
+You can also trigger a build manually anytime from **Actions → Build Android
+APK → Run workflow**, without needing a new push.
+
+### Option B — build it yourself locally
+
 You need [Android Studio](https://developer.android.com/studio) installed
 (it bundles the Android SDK) — or just the command-line SDK tools if you'd
 rather not install the full IDE. You also need Node.js 22+ (same as the rest
@@ -114,8 +136,7 @@ npm install
 npx react-native run-android
 ```
 
-**To build an installable release APK** (what you'd actually put on your
-phone day-to-day):
+**To build an installable release APK:**
 
 ```
 cd android
@@ -125,12 +146,12 @@ cd android
 The APK comes out at
 `mobile/android/app/build/outputs/apk/release/app-release.apk`. Copy it to
 your phone (email it to yourself, use `adb install`, whatever's easiest) and
-install it — you'll need to allow "install from unknown sources" once, since
-this isn't going through the Play Store.
+install it.
 
-*(The debug build is signed with the auto-generated debug keystore, which is
-fine for your own phone. If you ever want to publish this to the Play Store,
-you'll need to generate a proper release keystore — see React Native's
+*(Either way, the release build is signed with the project's auto-generated
+debug keystore, which is fine for installing on your own phone. If you ever
+want to publish this to the Play Store, you'll need to generate a proper
+release keystore — see React Native's
 ["Signed APK"](https://reactnative.dev/docs/signed-apk-android) guide.)*
 
 ---
