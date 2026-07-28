@@ -3,6 +3,7 @@
  */
 
 import { AppRegistry } from 'react-native';
+import crashlytics from '@react-native-firebase/crashlytics';
 import App from './App';
 import { name as appName } from './app.json';
 
@@ -16,6 +17,9 @@ if (typeof ErrorUtils !== 'undefined') {
   const previousHandler = ErrorUtils.getGlobalHandler();
   ErrorUtils.setGlobalHandler((error, isFatal) => {
     console.warn('Unhandled global error:', error, 'fatal:', isFatal);
+    try {
+      crashlytics().recordError(error instanceof Error ? error : new Error(String(error)));
+    } catch {}
     if (!isFatal) return;
     previousHandler(error, isFatal);
   });

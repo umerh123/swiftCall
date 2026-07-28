@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import crashlytics from '@react-native-firebase/crashlytics';
 import { colors } from './theme';
 
 interface Props {
@@ -26,6 +27,9 @@ export default class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.warn('Unhandled error caught by ErrorBoundary:', error, info.componentStack);
+    try {
+      crashlytics().recordError(error);
+    } catch {}
   }
 
   render() {

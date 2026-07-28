@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -128,4 +129,12 @@ dependencies {
     // package.json -> sdkVersions.android.firebase) so both stay consistent.
     implementation platform('com.google.firebase:firebase-bom:34.15.0')
     implementation 'com.google.firebase:firebase-messaging'
+
+    // Crash reporting — added specifically to see the real reason behind the
+    // crash-after-sign-in this app kept hitting, since this build environment
+    // has no way to attach a debugger or read the phone's own device log.
+    // NDK variant included too since a native (WebRTC/JNI) crash was one of
+    // the suspects.
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-crashlytics-ndk'
 }
