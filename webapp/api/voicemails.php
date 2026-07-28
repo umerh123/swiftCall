@@ -2,6 +2,14 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/telnyx.php';
+
+// The mobile app's native audio player fetches ?action=audio directly and
+// can't attach an Authorization header, so — for this one read-only action
+// only — a token in the query string is accepted too.
+if (($_GET['action'] ?? '') === 'audio' && empty($_SERVER['HTTP_AUTHORIZATION']) && !empty($_GET['token'])) {
+    $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $_GET['token'];
+}
+
 require_login_api();
 
 $uid = current_user()['id'];

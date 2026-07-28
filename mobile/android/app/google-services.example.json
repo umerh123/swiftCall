@@ -1,0 +1,20 @@
+{
+  "_comment": "This is a SHAPE EXAMPLE, not a real config. Download your real one from Firebase console -> Project settings -> General -> Your apps -> google-services.json, then save it as android/app/google-services.json (same folder as this file). See ../../MOBILE_SETUP.md.",
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "your-firebase-project-id",
+    "storage_bucket": "your-firebase-project-id.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": { "package_name": "com.swiftcall.dialer" }
+      },
+      "oauth_client": [],
+      "api_key": [{ "current_key": "REPLACE_ME" }],
+      "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -101,21 +101,20 @@ function fcm_send($deviceToken, $notification, $data = []) {
     $auth = fcm_access_token();
     if (!$auth['ok']) return ['ok' => false, 'error' => $auth['error'], 'unregistered' => false];
 
-    $strData = [];
+    // Data-only, deliberately: a top-level "notification" block would make
+    // Android auto-display a bare system notification whenever the app is
+    // backgrounded/killed, WITHOUT running AppFirebaseMessagingService —
+    // which is exactly the code that builds the tappable, deep-linking
+    // notification. Sending data-only guarantees onMessageReceived() (and
+    // so our own notification) runs no matter what state the app is in.
+    $strData = ['title' => (string)($notification['title'] ?? ''), 'body' => (string)($notification['body'] ?? '')];
     foreach ($data as $k => $v) $strData[$k] = (string)$v;
 
     $payload = [
         'message' => [
-            'token'        => $deviceToken,
-            'notification' => $notification,
-            'data'         => $strData,
-            'android'      => [
-                'priority' => 'high',
-                'notification' => [
-                    'channel_id' => 'messages',
-                    'sound'      => 'default',
-                ],
-            ],
+            'token'   => $deviceToken,
+            'data'    => $strData,
+            'android' => ['priority' => 'high'],
         ],
     ];
 
