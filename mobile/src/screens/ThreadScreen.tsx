@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { colors } from '../theme';
+import { colors, radius } from '../theme';
 import * as api from '../api/client';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Thread'>;
@@ -102,32 +102,33 @@ export default function ThreadScreen({ route, navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  list: { padding: 16 },
-  bubbleRow: { flexDirection: 'row', marginBottom: 8 },
+  list: { padding: 16, flexGrow: 1 },
+  bubbleRow: { flexDirection: 'row', marginBottom: 6 },
   bubbleRowOut: { justifyContent: 'flex-end' },
-  bubble: { maxWidth: '78%', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 10 },
-  bubbleIn: { backgroundColor: colors.card },
-  bubbleOut: { backgroundColor: colors.accent },
-  bubbleText: { color: colors.text, fontSize: 15 },
+  bubble: { maxWidth: '78%', borderRadius: radius.xl, paddingHorizontal: 14, paddingVertical: 9 },
+  bubbleIn: { backgroundColor: colors.bubbleIn, borderBottomLeftRadius: 4 },
+  bubbleOut: { backgroundColor: colors.bubbleOut, borderBottomRightRadius: 4 },
+  bubbleText: { color: colors.text, fontSize: 15, lineHeight: 20 },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.line,
+    backgroundColor: colors.panel,
     gap: 8,
   },
   input: {
     flex: 1,
-    backgroundColor: colors.card,
+    backgroundColor: colors.raised,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 18,
+    borderColor: colors.line,
+    borderRadius: radius.xl,
     paddingHorizontal: 16,
     paddingVertical: 10,
     color: colors.text,
     maxHeight: 120,
   },
-  sendBtn: { backgroundColor: colors.accent, borderRadius: 18, paddingHorizontal: 16, paddingVertical: 10 },
+  sendBtn: { backgroundColor: colors.accent, borderRadius: radius.xl, paddingHorizontal: 16, paddingVertical: 10 },
   sendBtnText: { color: '#fff', fontWeight: '600' },
 });

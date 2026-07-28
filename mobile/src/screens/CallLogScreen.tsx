@@ -5,7 +5,9 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
-import { colors } from '../theme';
+import { colors, radius } from '../theme';
+import Screen from '../components/Screen';
+import Avatar from '../components/Avatar';
 import * as api from '../api/client';
 import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
@@ -16,6 +18,16 @@ type Props = CompositeScreenProps<
 >;
 
 const DIRECTION_ICON: Record<string, string> = { inbound: '↙', outbound: '↗' };
+const STATUS_COLOR: Record<string, string> = { failed: colors.danger, missed: colors.danger, completed: colors.textMuted };
+
+function formatWhen(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay
+    ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
 
 export default function CallLogScreen({ navigation }: Props) {
   const [calls, setCalls] = useState<api.CallRecord[]>([]);
@@ -50,43 +62,80 @@ export default function CallLogScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
+    <Screen>
       <Text style={styles.header}>Recents</Text>
       <FlatList
         data={calls}
         keyExtractor={(c) => String(c.id)}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} tintColor={colors.textMuted} />}
-        ListEmptyComponent={<Text style={styles.empty}>No calls yet.</Text>}
+        contentContainerStyle={calls.length === 0 && styles.emptyList}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={async () => {
+              setRefreshing(true);
+              await load();
+              setRefreshing(false);
+            }}
+            tintColor={colors.textMuted}
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyIcon}>🕐</Text>
+            <Text style={styles.emptyText}>No calls yet</Text>
+          </View>
+        }
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.row} onPress={() => callBack(item.phone)}>
-            <Text style={styles.dirIcon}>{DIRECTION_ICON[item.direction] || ''}</Text>
+          <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={() => callBack(item.phone)}>
+            <View>
+              <Avatar name={item.display} size={44} />
+              <View style={styles.dirBadge}>
+                <Text style={styles.dirBadgeText}>{DIRECTION_ICON[item.direction] || ''}</Text>
+              </View>
+            </View>
             <View style={styles.rowMain}>
-              <Text style={styles.name}>{item.display}</Text>
-              <Text style={styles.meta}>
-                {item.status} · {new Date(item.created_at).toLocaleString()}
+              <Text style={styles.name} numberOfLines={1}>{item.display}</Text>
+              <Text style={[styles.meta, item.status in STATUS_COLOR && { color: STATUS_COLOR[item.status] }]}>
+                {item.status}
               </Text>
             </View>
+            <Text style={styles.time}>{formatWhen(item.created_at)}</Text>
           </TouchableOpacity>
         )}
       />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8 },
-  empty: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
+  header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8, letterSpacing: -0.5 },
+  emptyList: { flexGrow: 1 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
+  emptyIcon: { fontSize: 32, opacity: 0.4 },
+  emptyText: { color: colors.textMuted, fontSize: 14 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    paddingVertical: 12,
+    gap: 12,
   },
-  dirIcon: { color: colors.textMuted, fontSize: 18, width: 28 },
-  rowMain: { flex: 1 },
-  name: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  meta: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
+  dirBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: radius.pill,
+    backgroundColor: colors.panel,
+    borderWidth: 2,
+    borderColor: colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dirBadgeText: { color: colors.textMuted, fontSize: 10 },
+  rowMain: { flex: 1, minWidth: 0 },
+  name: { color: colors.text, fontSize: 15.5, fontWeight: '600' },
+  meta: { color: colors.textFaint, fontSize: 12.5, marginTop: 2, textTransform: 'capitalize' },
+  time: { color: colors.textFaint, fontSize: 12 },
 });

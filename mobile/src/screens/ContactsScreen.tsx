@@ -5,7 +5,9 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
-import { colors } from '../theme';
+import { colors, radius, shadow } from '../theme';
+import Screen from '../components/Screen';
+import Avatar from '../components/Avatar';
 import * as api from '../api/client';
 import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
@@ -17,6 +19,7 @@ type Props = CompositeScreenProps<
 
 export default function ContactsScreen({ navigation }: Props) {
   const [contacts, setContacts] = useState<api.Contact[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
@@ -46,6 +49,7 @@ export default function ContactsScreen({ navigation }: Props) {
       await api.saveContact(phone.trim(), name.trim(), '');
       setName('');
       setPhone('');
+      setShowAdd(false);
       await load();
     } catch (e: any) {
       Alert.alert('Could not save', e?.message || 'Something went wrong.');
@@ -86,86 +90,122 @@ export default function ContactsScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Contacts</Text>
-
-      <View style={styles.addBox}>
-        <TextInput
-          style={styles.input}
-          placeholder="Name (optional)"
-          placeholderTextColor={colors.textMuted}
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Phone number"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
-        <TouchableOpacity style={styles.addBtn} onPress={addContact} disabled={saving}>
-          <Text style={styles.addBtnText}>Add contact</Text>
+    <Screen>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>Contacts</Text>
+        <TouchableOpacity style={styles.addToggle} activeOpacity={0.8} onPress={() => setShowAdd((v) => !v)}>
+          <Text style={styles.addToggleText}>{showAdd ? '✕' : '+'}</Text>
         </TouchableOpacity>
       </View>
+
+      {showAdd && (
+        <View style={styles.addBox}>
+          <TextInput
+            style={styles.input}
+            placeholder="Name (optional)"
+            placeholderTextColor={colors.textFaint}
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Phone number"
+            placeholderTextColor={colors.textFaint}
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
+          <TouchableOpacity style={styles.addBtn} activeOpacity={0.85} onPress={addContact} disabled={saving}>
+            <Text style={styles.addBtnText}>Save contact</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <FlatList
         data={contacts}
         keyExtractor={(c) => String(c.id)}
-        ListEmptyComponent={<Text style={styles.empty}>No contacts yet.</Text>}
+        contentContainerStyle={contacts.length === 0 && styles.emptyList}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyIcon}>👤</Text>
+            <Text style={styles.emptyText}>No contacts yet</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <TouchableOpacity style={styles.rowMain} onPress={() => callContact(item)}>
-              <Text style={styles.name}>{item.display}</Text>
-              <Text style={styles.meta}>{item.phone}</Text>
+            <TouchableOpacity style={styles.rowMain} activeOpacity={0.6} onPress={() => callContact(item)}>
+              <Avatar name={item.display} size={44} />
+              <View style={styles.rowText}>
+                <Text style={styles.name} numberOfLines={1}>{item.display}</Text>
+                <Text style={styles.meta}>{item.phone}</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.msgBtn}
+              style={styles.iconBtn}
               onPress={() => navigation.navigate('Thread', { phone: item.phone, display: item.display })}
             >
-              <Text style={styles.msgBtnText}>✉</Text>
+              <Text style={styles.iconBtnText}>✉</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteBtn} onPress={() => removeContact(item)}>
-              <Text style={styles.deleteBtnText}>✕</Text>
+            <TouchableOpacity style={styles.iconBtn} onPress={() => removeContact(item)}>
+              <Text style={[styles.iconBtnText, styles.deleteText]}>✕</Text>
             </TouchableOpacity>
           </View>
         )}
       />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8 },
-  addBox: { paddingHorizontal: 20, marginBottom: 12, gap: 8 },
-  input: {
-    backgroundColor: colors.card,
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 },
+  header: { color: colors.text, fontSize: 28, fontWeight: '700', letterSpacing: -0.5 },
+  addToggle: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addToggleText: { color: '#fff', fontSize: 20, fontWeight: '600', lineHeight: 22 },
+  addBox: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+    padding: 14,
+    gap: 8,
+    backgroundColor: colors.panel,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
+    borderColor: colors.line,
+    borderRadius: radius.lg,
+    ...shadow.card,
+  },
+  input: {
+    backgroundColor: colors.raised,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 10,
     color: colors.text,
   },
-  addBtn: { backgroundColor: colors.accent, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  addBtn: { backgroundColor: colors.accent, borderRadius: radius.md, paddingVertical: 12, alignItems: 'center' },
   addBtnText: { color: '#fff', fontWeight: '600' },
-  empty: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
+  emptyList: { flexGrow: 1 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
+  emptyIcon: { fontSize: 32, opacity: 0.4 },
+  emptyText: { color: colors.textMuted, fontSize: 14 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: 8,
+    paddingVertical: 10,
+    gap: 4,
   },
-  rowMain: { flex: 1 },
-  name: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  meta: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
-  msgBtn: { padding: 8 },
-  msgBtnText: { color: colors.accent, fontSize: 18 },
-  deleteBtn: { padding: 8 },
-  deleteBtnText: { color: colors.danger, fontSize: 16 },
+  rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0 },
+  rowText: { flex: 1, minWidth: 0 },
+  name: { color: colors.text, fontSize: 15.5, fontWeight: '600' },
+  meta: { color: colors.textFaint, fontSize: 13, marginTop: 2 },
+  iconBtn: { width: 34, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  iconBtnText: { color: colors.accent, fontSize: 16 },
+  deleteText: { color: colors.danger },
 });

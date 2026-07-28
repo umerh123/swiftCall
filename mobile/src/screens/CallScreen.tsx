@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { colors } from '../theme';
+import { colors, radius } from '../theme';
+import Avatar from '../components/Avatar';
+import Screen from '../components/Screen';
 import { TelnyxCallState } from '@telnyx/react-voice-commons-sdk';
 import { useActiveCall } from '../voip/hooks';
 import { logCall } from '../api/client';
@@ -10,12 +12,8 @@ import { logCall } from '../api/client';
 type Props = NativeStackScreenProps<RootStackParamList, 'Call'>;
 
 function formatDuration(sec: number): string {
-  const m = Math.floor(sec / 60)
-    .toString()
-    .padStart(2, '0');
-  const s = Math.floor(sec % 60)
-    .toString()
-    .padStart(2, '0');
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
 
@@ -57,10 +55,14 @@ export default function CallScreen({ navigation }: Props) {
   if (!call) return null;
 
   const name = call.callerName || call.callerNumber || call.destination;
+  const isRinging = call.isIncoming && call.currentState === TelnyxCallState.RINGING;
 
   return (
-    <View style={styles.container}>
+    <Screen edges={['top', 'bottom']} style={styles.container}>
       <View style={styles.info}>
+        <View style={[styles.avatarRing, call.currentState === TelnyxCallState.ACTIVE && styles.avatarRingLive]}>
+          <Avatar name={name} size={104} />
+        </View>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.status}>
           {call.currentState === TelnyxCallState.ACTIVE
@@ -69,74 +71,111 @@ export default function CallScreen({ navigation }: Props) {
         </Text>
       </View>
 
-      {call.isIncoming && call.currentState === TelnyxCallState.RINGING ? (
+      {isRinging ? (
         <View style={styles.incomingRow}>
-          <TouchableOpacity
-            style={[styles.roundBtn, styles.reject]}
-            onPress={() => call.hangup().catch(() => {})}
-          >
-            <Text style={styles.roundBtnIcon}>✕</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.roundBtn, styles.accept]}
-            onPress={() => call.answer().catch(() => {})}
-          >
-            <Text style={styles.roundBtnIcon}>✓</Text>
-          </TouchableOpacity>
+          <View style={styles.incomingCol}>
+            <TouchableOpacity
+              style={[styles.roundBtn, styles.reject]}
+              activeOpacity={0.85}
+              onPress={() => call.hangup().catch(() => {})}
+            >
+              <Text style={styles.roundBtnIcon}>✕</Text>
+            </TouchableOpacity>
+            <Text style={styles.incomingLabel}>Decline</Text>
+          </View>
+          <View style={styles.incomingCol}>
+            <TouchableOpacity
+              style={[styles.roundBtn, styles.accept]}
+              activeOpacity={0.85}
+              onPress={() => call.answer().catch(() => {})}
+            >
+              <Text style={styles.roundBtnIcon}>✓</Text>
+            </TouchableOpacity>
+            <Text style={styles.incomingLabel}>Answer</Text>
+          </View>
         </View>
       ) : (
-        <>
+        <View style={styles.activeControls}>
           <View style={styles.controlsRow}>
-            <TouchableOpacity
-              style={[styles.controlBtn, muted && styles.controlBtnActive]}
-              onPress={() => call.toggleMute().catch(() => {})}
-            >
-              <Text style={styles.controlBtnText}>{muted ? 'Unmute' : 'Mute'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.controlBtn, held && styles.controlBtnActive]}
-              onPress={() => (held ? call.resume() : call.hold()).catch(() => {})}
-            >
-              <Text style={styles.controlBtnText}>{held ? 'Resume' : 'Hold'}</Text>
-            </TouchableOpacity>
+            <View style={styles.controlCol}>
+              <TouchableOpacity
+                style={[styles.controlBtn, muted && styles.controlBtnActive]}
+                activeOpacity={0.8}
+                onPress={() => call.toggleMute().catch(() => {})}
+              >
+                <Text style={styles.controlBtnIcon}>{muted ? '🔇' : '🎙'}</Text>
+              </TouchableOpacity>
+              <Text style={styles.controlLabel}>{muted ? 'Unmute' : 'Mute'}</Text>
+            </View>
+            <View style={styles.controlCol}>
+              <TouchableOpacity
+                style={[styles.controlBtn, held && styles.controlBtnActive]}
+                activeOpacity={0.8}
+                onPress={() => (held ? call.resume() : call.hold()).catch(() => {})}
+              >
+                <Text style={styles.controlBtnIcon}>{held ? '▶' : '⏸'}</Text>
+              </TouchableOpacity>
+              <Text style={styles.controlLabel}>{held ? 'Resume' : 'Hold'}</Text>
+            </View>
           </View>
           <TouchableOpacity
             style={[styles.roundBtn, styles.reject, styles.hangupSolo]}
+            activeOpacity={0.85}
             onPress={() => call.hangup().catch(() => {})}
           >
             <Text style={styles.roundBtnIcon}>✕</Text>
           </TouchableOpacity>
-        </>
+        </View>
       )}
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg, justifyContent: 'space-between', paddingVertical: 64 },
-  info: { alignItems: 'center', marginTop: 40 },
-  name: { color: colors.text, fontSize: 28, fontWeight: '600' },
-  status: { color: colors.textMuted, fontSize: 16, marginTop: 8 },
-  incomingRow: { flexDirection: 'row', justifyContent: 'space-evenly', marginBottom: 40 },
-  controlsRow: { flexDirection: 'row', justifyContent: 'center', gap: 16 },
-  controlBtn: {
-    backgroundColor: colors.card,
-    borderRadius: 999,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    marginHorizontal: 8,
+  container: { justifyContent: 'space-between', paddingVertical: 32 },
+  info: { alignItems: 'center', marginTop: 56 },
+  avatarRing: {
+    padding: 6,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  controlBtnActive: { backgroundColor: colors.accent },
-  controlBtnText: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  hangupSolo: { alignSelf: 'center', marginTop: 32 },
-  roundBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: 999,
+  avatarRingLive: { borderColor: colors.accentWash },
+  name: { color: colors.text, fontSize: 26, fontWeight: '600', marginTop: 20, letterSpacing: -0.3 },
+  status: { color: colors.textMuted, fontSize: 15, marginTop: 8, fontVariant: ['tabular-nums'] },
+  incomingRow: { flexDirection: 'row', justifyContent: 'space-evenly', marginBottom: 48 },
+  incomingCol: { alignItems: 'center', gap: 10 },
+  incomingLabel: { color: colors.textMuted, fontSize: 13, fontWeight: '600' },
+  activeControls: { alignItems: 'center' },
+  controlsRow: { flexDirection: 'row', justifyContent: 'center', gap: 28 },
+  controlCol: { alignItems: 'center', gap: 8 },
+  controlBtn: {
+    width: 58,
+    height: 58,
+    borderRadius: radius.pill,
+    backgroundColor: colors.raised,
+    borderWidth: 1,
+    borderColor: colors.lineSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  controlBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+  controlBtnIcon: { fontSize: 20 },
+  controlLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '600' },
+  hangupSolo: { alignSelf: 'center', marginTop: 36 },
+  roundBtn: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 6,
+  },
   accept: { backgroundColor: colors.success },
   reject: { backgroundColor: colors.danger },
-  roundBtnIcon: { color: '#fff', fontSize: 28, fontWeight: '700' },
+  roundBtnIcon: { color: '#fff', fontSize: 26, fontWeight: '700' },
 });

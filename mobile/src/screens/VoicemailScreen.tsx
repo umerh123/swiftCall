@@ -1,8 +1,19 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl, Linking, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors } from '../theme';
+import { colors, radius } from '../theme';
+import Screen from '../components/Screen';
+import Avatar from '../components/Avatar';
 import * as api from '../api/client';
+
+function formatWhen(iso: string): string {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay
+    ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+    : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
 
 export default function VoicemailScreen() {
   const [voicemails, setVoicemails] = useState<api.Voicemail[]>([]);
@@ -55,11 +66,12 @@ export default function VoicemailScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <Screen>
       <Text style={styles.header}>Voicemail</Text>
       <FlatList
         data={voicemails}
         keyExtractor={(v) => String(v.id)}
+        contentContainerStyle={voicemails.length === 0 && styles.emptyList}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -71,43 +83,74 @@ export default function VoicemailScreen() {
             tintColor={colors.textMuted}
           />
         }
-        ListEmptyComponent={<Text style={styles.empty}>No voicemails.</Text>}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyIcon}>📼</Text>
+            <Text style={styles.emptyText}>No voicemails</Text>
+          </View>
+        }
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.row} onPress={() => play(item)}>
-            {!item.listened && <View style={styles.dot} />}
+          <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={() => play(item)}>
+            <View>
+              <Avatar name={item.display} size={44} />
+              {!item.listened && <View style={styles.dot} />}
+            </View>
             <View style={styles.rowMain}>
-              <Text style={styles.name}>{item.display}</Text>
+              <Text style={[styles.name, !item.listened && styles.nameUnread]} numberOfLines={1}>{item.display}</Text>
               <Text style={styles.meta}>
-                {new Date(item.created_at).toLocaleString()} · {item.duration}s
+                {formatWhen(item.created_at)} · {item.duration}s
               </Text>
             </View>
-            <TouchableOpacity onPress={() => remove(item)} style={styles.deleteBtn}>
+            <View style={styles.playBtn}>
+              <Text style={styles.playBtnText}>▶</Text>
+            </View>
+            <TouchableOpacity onPress={() => remove(item)} style={styles.deleteBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Text style={styles.deleteBtnText}>✕</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         )}
       />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8 },
-  empty: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
+  header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8, letterSpacing: -0.5 },
+  emptyList: { flexGrow: 1 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
+  emptyIcon: { fontSize: 32, opacity: 0.4 },
+  emptyText: { color: colors.textMuted, fontSize: 14 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: 10,
+    paddingVertical: 10,
+    gap: 12,
   },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
-  rowMain: { flex: 1 },
-  name: { color: colors.text, fontSize: 16, fontWeight: '600' },
-  meta: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
-  deleteBtn: { padding: 8 },
-  deleteBtnText: { color: colors.danger, fontSize: 16 },
+  dot: {
+    position: 'absolute',
+    top: -1,
+    right: -1,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.accent,
+    borderWidth: 2,
+    borderColor: colors.bg,
+  },
+  rowMain: { flex: 1, minWidth: 0 },
+  name: { color: colors.textMuted, fontSize: 15.5, fontWeight: '600' },
+  nameUnread: { color: colors.text },
+  meta: { color: colors.textFaint, fontSize: 12.5, marginTop: 2 },
+  playBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accentWash,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  playBtnText: { color: colors.accent, fontSize: 11 },
+  deleteBtn: { padding: 6 },
+  deleteBtnText: { color: colors.danger, fontSize: 15 },
 });

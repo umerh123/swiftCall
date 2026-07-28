@@ -32,9 +32,17 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
-        tabBarIcon: () => <Text style={{ fontSize: 20 }}>{TAB_ICON[route.name]}</Text>,
+        tabBarInactiveTintColor: colors.textFaint,
+        tabBarStyle: {
+          backgroundColor: colors.panel,
+          borderTopColor: colors.line,
+          borderTopWidth: 1,
+          height: 58,
+          paddingBottom: 6,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarIcon: ({ color }) => <Text style={{ fontSize: 19, color }}>{TAB_ICON[route.name]}</Text>,
       })}
     >
       <Tab.Screen name="Dialer" component={DialerScreen} />
@@ -50,8 +58,10 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: colors.bg },
+        headerStyle: { backgroundColor: colors.panel },
         headerTintColor: colors.text,
+        headerTitleStyle: { fontSize: 17, fontWeight: '600' },
+        headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.bg },
       }}
     >
@@ -63,7 +73,7 @@ export default function RootNavigator() {
         component={CallScreen}
         options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
       />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
     </Stack.Navigator>
   );
 }
