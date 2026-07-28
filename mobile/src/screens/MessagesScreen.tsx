@@ -8,6 +8,7 @@ import { MainTabParamList, RootStackParamList } from '../navigation/types';
 import { colors, radius } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
+import Icon from '../components/Icon';
 import * as api from '../api/client';
 
 type Props = CompositeScreenProps<
@@ -58,7 +59,7 @@ export default function MessagesScreen({ navigation }: Props) {
           returnKeyType="go"
         />
         <TouchableOpacity style={styles.newBtn} onPress={openNew} activeOpacity={0.8}>
-          <Text style={styles.newBtnText}>Go</Text>
+          <Icon name="arrow-right" size={18} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -79,10 +80,11 @@ export default function MessagesScreen({ navigation }: Props) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>💬</Text>
+            <Icon name="message-text-outline" size={34} color={colors.textFaint} />
             <Text style={styles.emptyText}>No messages yet</Text>
           </View>
         }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.row}
@@ -126,12 +128,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: colors.text,
   },
-  newBtn: { backgroundColor: colors.accent, borderRadius: radius.lg, paddingHorizontal: 18, justifyContent: 'center' },
-  newBtnText: { color: '#fff', fontWeight: '600' },
+  newBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.lg,
+    width: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyList: { flexGrow: 1 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  emptyIcon: { fontSize: 32, opacity: 0.4 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   emptyText: { color: colors.textMuted, fontSize: 14 },
+  separator: { height: 1, backgroundColor: colors.lineSoft, marginLeft: 76 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

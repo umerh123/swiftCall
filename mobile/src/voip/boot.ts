@@ -3,6 +3,15 @@ import { getFcmToken, requestMicrophonePermission, requestNotificationPermission
 import { loginToVoip } from './client';
 
 let inFlight: Promise<void> | null = null;
+let lastError: string | null = null;
+
+/** So the UI can show *why* it's not connecting instead of a "Connecting…"
+ *  pill that spins forever with no explanation — bootVoip() swallows its
+ *  own errors deliberately (a setup problem shouldn't block the rest of
+ *  the app), so this is the only way that reason surfaces anywhere. */
+export function getLastVoipError(): string | null {
+  return lastError;
+}
 
 // Breadcrumbs attach to the *next* crash report Crashlytics sends, even a
 // hard native one this code never gets a chance to catch — so the report at
@@ -37,10 +46,12 @@ export async function bootVoip(): Promise<void> {
       step('calling voipClient.login()');
       await loginToVoip(fcmToken ?? undefined);
       step('voipClient.login() resolved');
+      lastError = null;
     } catch (e) {
       // Non-fatal — the person can still use messages/contacts even if
       // their calling line isn't connected yet.
       console.warn('VoIP boot failed:', e);
+      lastError = e instanceof Error ? e.message : String(e);
       try {
         crashlytics().recordError(e instanceof Error ? e : new Error(String(e)));
       } catch {}

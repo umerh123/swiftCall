@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { colors } from '../theme';
+import { colors, radius, shadow } from '../theme';
+import Icon from '../components/Icon';
 import { TelnyxVoipClient } from '@telnyx/react-voice-commons-sdk';
 import * as api from '../api/client';
 import { getServerUrl, setServerUrl, setToken, setUser, getUser, getToken } from '../storage/settings';
@@ -88,43 +89,48 @@ export default function LoginScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <View style={styles.mark}>
+          <Icon name="phone" size={22} color={colors.text} />
+        </View>
         <Text style={styles.title}>Console</Text>
         <Text style={styles.subtitle}>Your line is private. Sign in to open it.</Text>
 
-        <Text style={styles.label}>Server address</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="https://yourdomain.com/dialer"
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-          value={serverUrl}
-          onChangeText={setServerUrlField}
-        />
+        <View style={styles.card}>
+          <Text style={styles.label}>Server address</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="https://yourdomain.com/dialer"
+            placeholderTextColor={colors.textFaint}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            value={serverUrl}
+            onChangeText={setServerUrlField}
+          />
 
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor={colors.textMuted}
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={username}
-          onChangeText={setUsername}
-        />
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            style={styles.input}
+            placeholderTextColor={colors.textFaint}
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={username}
+            onChangeText={setUsername}
+          />
 
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholderTextColor={colors.textFaint}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
 
-        <TouchableOpacity style={styles.button} onPress={onSubmit} disabled={busy}>
-          {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in</Text>}
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={onSubmit} disabled={busy} activeOpacity={0.85}>
+            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in</Text>}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -133,26 +139,46 @@ export default function LoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   center: { alignItems: 'center', justifyContent: 'center' },
-  scroll: { padding: 24, paddingTop: 96 },
-  title: { color: colors.text, fontSize: 32, fontWeight: '700', marginBottom: 8 },
-  subtitle: { color: colors.textMuted, fontSize: 15, marginBottom: 32 },
-  label: { color: colors.textMuted, fontSize: 13, marginBottom: 6, marginTop: 16 },
-  input: {
-    backgroundColor: colors.card,
+  scroll: { padding: 24, paddingTop: 88, flexGrow: 1 },
+  mark: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.lg,
+    backgroundColor: colors.raised,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
+    borderColor: colors.lineHot,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    ...shadow.card,
+  },
+  title: { color: colors.text, fontSize: 30, fontWeight: '700', letterSpacing: -0.5, marginBottom: 6 },
+  subtitle: { color: colors.textMuted, fontSize: 14.5, marginBottom: 28 },
+  card: {
+    backgroundColor: colors.panel,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.xl,
+    padding: 20,
+    ...shadow.card,
+  },
+  label: { color: colors.textFaint, fontSize: 11.5, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 7, marginTop: 16 },
+  input: {
+    backgroundColor: colors.raised,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 12,
     color: colors.text,
-    fontSize: 16,
+    fontSize: 15.5,
   },
   button: {
     backgroundColor: colors.accent,
-    borderRadius: 10,
+    borderRadius: radius.md,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 28,
+    marginTop: 26,
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

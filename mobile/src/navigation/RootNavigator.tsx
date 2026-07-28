@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamList, MainTabParamList } from './types';
 import { colors } from '../theme';
+import Icon from '../components/Icon';
 
 import LoginScreen from '../screens/LoginScreen';
 import DialerScreen from '../screens/DialerScreen';
@@ -19,11 +19,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const TAB_ICON: Record<keyof MainTabParamList, string> = {
-  Dialer: '⌨',
-  Recents: '🕐',
-  Messages: '💬',
-  Contacts: '👤',
-  Voicemail: '📼',
+  Dialer: 'dialpad',
+  Recents: 'history',
+  Messages: 'message-text-outline',
+  Contacts: 'account-outline',
+  Voicemail: 'voicemail',
 };
 
 function MainTabs() {
@@ -42,7 +42,7 @@ function MainTabs() {
           paddingTop: 6,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
-        tabBarIcon: ({ color }) => <Text style={{ fontSize: 19, color }}>{TAB_ICON[route.name]}</Text>,
+        tabBarIcon: ({ color }) => <Icon name={TAB_ICON[route.name]} size={22} color={color} />,
       })}
     >
       <Tab.Screen name="Dialer" component={DialerScreen} />

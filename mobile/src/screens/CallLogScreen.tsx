@@ -8,6 +8,7 @@ import { MainTabParamList, RootStackParamList } from '../navigation/types';
 import { colors, radius } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
+import Icon from '../components/Icon';
 import * as api from '../api/client';
 import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
@@ -17,7 +18,7 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-const DIRECTION_ICON: Record<string, string> = { inbound: '↙', outbound: '↗' };
+const DIRECTION_ICON: Record<string, string> = { inbound: 'arrow-bottom-left', outbound: 'arrow-top-right' };
 const STATUS_COLOR: Record<string, string> = { failed: colors.danger, missed: colors.danger, completed: colors.textMuted };
 
 function formatWhen(iso: string): string {
@@ -81,16 +82,21 @@ export default function CallLogScreen({ navigation }: Props) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>🕐</Text>
+            <Icon name="history" size={34} color={colors.textFaint} />
             <Text style={styles.emptyText}>No calls yet</Text>
           </View>
         }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={() => callBack(item.phone)}>
             <View>
               <Avatar name={item.display} size={44} />
               <View style={styles.dirBadge}>
-                <Text style={styles.dirBadgeText}>{DIRECTION_ICON[item.direction] || ''}</Text>
+                <Icon
+                  name={DIRECTION_ICON[item.direction] || 'phone'}
+                  size={10}
+                  color={item.status === 'failed' || item.status === 'missed' ? colors.danger : colors.textMuted}
+                />
               </View>
             </View>
             <View style={styles.rowMain}>
@@ -100,6 +106,9 @@ export default function CallLogScreen({ navigation }: Props) {
               </Text>
             </View>
             <Text style={styles.time}>{formatWhen(item.created_at)}</Text>
+            <View style={styles.callAgainBtn}>
+              <Icon name="phone-outline" size={16} color={colors.accent} />
+            </View>
           </TouchableOpacity>
         )}
       />
@@ -110,9 +119,9 @@ export default function CallLogScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8, letterSpacing: -0.5 },
   emptyList: { flexGrow: 1 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  emptyIcon: { fontSize: 32, opacity: 0.4 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   emptyText: { color: colors.textMuted, fontSize: 14 },
+  separator: { height: 1, backgroundColor: colors.lineSoft, marginLeft: 76 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -133,9 +142,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dirBadgeText: { color: colors.textMuted, fontSize: 10 },
   rowMain: { flex: 1, minWidth: 0 },
   name: { color: colors.text, fontSize: 15.5, fontWeight: '600' },
   meta: { color: colors.textFaint, fontSize: 12.5, marginTop: 2, textTransform: 'capitalize' },
-  time: { color: colors.textFaint, fontSize: 12 },
+  time: { color: colors.textFaint, fontSize: 12, marginRight: 4 },
+  callAgainBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accentWash,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radius } from '../theme';
+import Icon from '../components/Icon';
 import * as api from '../api/client';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Thread'>;
@@ -92,8 +93,13 @@ export default function ThreadScreen({ route, navigation }: Props) {
           onChangeText={setText}
           multiline
         />
-        <TouchableOpacity style={styles.sendBtn} onPress={send} disabled={sending}>
-          <Text style={styles.sendBtnText}>Send</Text>
+        <TouchableOpacity
+          style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
+          onPress={send}
+          disabled={sending || !text.trim()}
+          activeOpacity={0.85}
+        >
+          <Icon name="send" size={17} color="#fff" style={styles.sendIcon} />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -129,6 +135,14 @@ const styles = StyleSheet.create({
     color: colors.text,
     maxHeight: 120,
   },
-  sendBtn: { backgroundColor: colors.accent, borderRadius: radius.xl, paddingHorizontal: 16, paddingVertical: 10 },
-  sendBtnText: { color: '#fff', fontWeight: '600' },
+  sendBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.pill,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtnDisabled: { backgroundColor: colors.raised },
+  sendIcon: { marginLeft: 2 },
 });

@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { colors, radius } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
+import Icon from '../components/Icon';
 import * as api from '../api/client';
 
 function formatWhen(iso: string): string {
@@ -85,10 +86,11 @@ export default function VoicemailScreen() {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>📼</Text>
+            <Icon name="voicemail" size={34} color={colors.textFaint} />
             <Text style={styles.emptyText}>No voicemails</Text>
           </View>
         }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={() => play(item)}>
             <View>
@@ -102,10 +104,10 @@ export default function VoicemailScreen() {
               </Text>
             </View>
             <View style={styles.playBtn}>
-              <Text style={styles.playBtnText}>▶</Text>
+              <Icon name="play" size={14} color={colors.accent} />
             </View>
             <TouchableOpacity onPress={() => remove(item)} style={styles.deleteBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text style={styles.deleteBtnText}>✕</Text>
+              <Icon name="trash-can-outline" size={17} color={colors.danger} />
             </TouchableOpacity>
           </TouchableOpacity>
         )}
@@ -117,9 +119,9 @@ export default function VoicemailScreen() {
 const styles = StyleSheet.create({
   header: { color: colors.text, fontSize: 28, fontWeight: '700', padding: 20, paddingBottom: 8, letterSpacing: -0.5 },
   emptyList: { flexGrow: 1 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  emptyIcon: { fontSize: 32, opacity: 0.4 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
   emptyText: { color: colors.textMuted, fontSize: 14 },
+  separator: { height: 1, backgroundColor: colors.lineSoft, marginLeft: 76 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -8,6 +8,7 @@ import { MainTabParamList, RootStackParamList } from '../navigation/types';
 import { colors, radius, shadow } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
+import Icon from '../components/Icon';
 import * as api from '../api/client';
 import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
@@ -94,7 +95,7 @@ export default function ContactsScreen({ navigation }: Props) {
       <View style={styles.headerRow}>
         <Text style={styles.header}>Contacts</Text>
         <TouchableOpacity style={styles.addToggle} activeOpacity={0.8} onPress={() => setShowAdd((v) => !v)}>
-          <Text style={styles.addToggleText}>{showAdd ? '✕' : '+'}</Text>
+          <Icon name={showAdd ? 'close' : 'plus'} size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -127,7 +128,7 @@ export default function ContactsScreen({ navigation }: Props) {
         contentContainerStyle={contacts.length === 0 && styles.emptyList}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>👤</Text>
+            <Icon name="account-outline" size={34} color={colors.textFaint} />
             <Text style={styles.emptyText}>No contacts yet</Text>
           </View>
         }

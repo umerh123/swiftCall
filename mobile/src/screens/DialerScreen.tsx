@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { CompositeScreenProps } from '@react-navigation/native';
+import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
 import { colors, radius, shadow } from '../theme';
 import Screen from '../components/Screen';
+import Icon from '../components/Icon';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
 import { voipClient } from '../voip/client';
 import { useConnectionState } from '../voip/hooks';
+import { bootVoip, getLastVoipError } from '../voip/boot';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Dialer'>,
@@ -32,8 +34,25 @@ const KEYS: [string, string][] = [
 
 export default function DialerScreen({ navigation }: Props) {
   const [digits, setDigits] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const connectionState = useConnectionState();
   const connected = connectionState === TelnyxConnectionState.CONNECTED;
+  const connecting = connectionState === TelnyxConnectionState.CONNECTING;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setError(getLastVoipError());
+    }, [connectionState])
+  );
+
+  async function retry() {
+    setRetrying(true);
+    setError(null);
+    await bootVoip();
+    setError(getLastVoipError());
+    setRetrying(false);
+  }
 
   async function call() {
     const dest = digits.trim();
@@ -50,21 +69,43 @@ export default function DialerScreen({ navigation }: Props) {
     }
   }
 
+  const showError = !connected && !connecting && !!error;
+
   return (
     <Screen>
       <View style={styles.topBar}>
-        <View style={styles.statusPill}>
-          <View style={[styles.lamp, connected && styles.lampReady]} />
-          <Text style={styles.statusText}>{connected ? 'Ready' : 'Connecting…'}</Text>
-        </View>
+        <TouchableOpacity
+          style={styles.statusPill}
+          disabled={connected || retrying}
+          onPress={showError ? retry : undefined}
+          activeOpacity={showError ? 0.7 : 1}
+        >
+          {retrying ? (
+            <Text style={styles.statusText}>Retrying…</Text>
+          ) : (
+            <>
+              <View style={[styles.lamp, connected && styles.lampReady, showError && styles.lampError]} />
+              <Text style={styles.statusText}>
+                {connected ? 'Ready' : showError ? 'Tap to retry' : 'Connecting…'}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingsBtn}
           onPress={() => navigation.navigate('Settings')}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.settingsBtnText}>⚙</Text>
+          <Icon name="cog-outline" size={19} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
+
+      {showError && (
+        <TouchableOpacity style={styles.errorBanner} onPress={retry} activeOpacity={0.8}>
+          <Icon name="alert-circle-outline" size={16} color={colors.danger} />
+          <Text style={styles.errorText} numberOfLines={2}>{error}</Text>
+        </TouchableOpacity>
+      )}
 
       <View style={styles.displayWrap}>
         <Text style={styles.display} numberOfLines={1} adjustsFontSizeToFit>
@@ -77,7 +118,7 @@ export default function DialerScreen({ navigation }: Props) {
             style={styles.backspace}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.backspaceText}>⌫</Text>
+            <Icon name="backspace-outline" size={22} color={colors.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -103,7 +144,7 @@ export default function DialerScreen({ navigation }: Props) {
         activeOpacity={0.85}
         disabled={!digits}
       >
-        <Text style={styles.callBtnIcon}>{'☎'}</Text>
+        <Icon name="phone" size={26} color="#fff" />
       </TouchableOpacity>
     </Screen>
   );
@@ -136,6 +177,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 0 },
   },
+  lampError: { backgroundColor: colors.danger },
   statusText: { color: colors.textMuted, fontSize: 12.5, fontWeight: '600' },
   settingsBtn: {
     width: 36,
@@ -147,7 +189,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  settingsBtnText: { fontSize: 17, color: colors.textMuted },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    marginTop: 10,
+    padding: 10,
+    borderRadius: radius.md,
+    backgroundColor: colors.dangerWash,
+    borderWidth: 1,
+    borderColor: 'rgba(220,38,38,.3)',
+  },
+  errorText: { flex: 1, color: '#FFD4DA', fontSize: 12.5 },
   displayWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -164,7 +218,6 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   backspace: { position: 'absolute', right: 24, padding: 8 },
-  backspaceText: { fontSize: 22, color: colors.textMuted },
   pad: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -204,5 +257,4 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   callBtnDisabled: { backgroundColor: colors.raised, shadowOpacity: 0 },
-  callBtnIcon: { color: '#fff', fontSize: 26 },
 });

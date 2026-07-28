@@ -5,6 +5,7 @@ import { RootStackParamList } from '../navigation/types';
 import { colors, radius } from '../theme';
 import Avatar from '../components/Avatar';
 import Screen from '../components/Screen';
+import Icon from '../components/Icon';
 import { TelnyxCallState } from '@telnyx/react-voice-commons-sdk';
 import { useActiveCall } from '../voip/hooks';
 import { logCall } from '../api/client';
@@ -79,7 +80,7 @@ export default function CallScreen({ navigation }: Props) {
               activeOpacity={0.85}
               onPress={() => call.hangup().catch(() => {})}
             >
-              <Text style={styles.roundBtnIcon}>✕</Text>
+              <Icon name="phone-hangup" size={28} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.incomingLabel}>Decline</Text>
           </View>
@@ -89,7 +90,7 @@ export default function CallScreen({ navigation }: Props) {
               activeOpacity={0.85}
               onPress={() => call.answer().catch(() => {})}
             >
-              <Text style={styles.roundBtnIcon}>✓</Text>
+              <Icon name="phone" size={26} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.incomingLabel}>Answer</Text>
           </View>
@@ -103,7 +104,7 @@ export default function CallScreen({ navigation }: Props) {
                 activeOpacity={0.8}
                 onPress={() => call.toggleMute().catch(() => {})}
               >
-                <Text style={styles.controlBtnIcon}>{muted ? '🔇' : '🎙'}</Text>
+                <Icon name={muted ? 'microphone-off' : 'microphone'} size={22} color={muted ? '#fff' : colors.text} />
               </TouchableOpacity>
               <Text style={styles.controlLabel}>{muted ? 'Unmute' : 'Mute'}</Text>
             </View>
@@ -113,7 +114,7 @@ export default function CallScreen({ navigation }: Props) {
                 activeOpacity={0.8}
                 onPress={() => (held ? call.resume() : call.hold()).catch(() => {})}
               >
-                <Text style={styles.controlBtnIcon}>{held ? '▶' : '⏸'}</Text>
+                <Icon name={held ? 'play' : 'pause'} size={22} color={held ? '#fff' : colors.text} />
               </TouchableOpacity>
               <Text style={styles.controlLabel}>{held ? 'Resume' : 'Hold'}</Text>
             </View>
@@ -123,7 +124,7 @@ export default function CallScreen({ navigation }: Props) {
             activeOpacity={0.85}
             onPress={() => call.hangup().catch(() => {})}
           >
-            <Text style={styles.roundBtnIcon}>✕</Text>
+            <Icon name="phone-hangup" size={28} color="#fff" />
           </TouchableOpacity>
         </View>
       )}
