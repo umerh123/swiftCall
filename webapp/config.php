@@ -45,6 +45,14 @@ define('DEEPGRAM_API_KEY', '');
 // ---- 8. Your timezone ----
 date_default_timezone_set('America/New_York');
 
+// ---- 9. Optional: mobile app push notifications for incoming texts ----
+//         See MOBILE_SETUP.md. Incoming *calls* don't need this — Telnyx
+//         pushes those straight to the phone once the Android push
+//         credential is set up in the Telnyx portal. This is only for SMS.
+//         Put the Firebase service-account JSON at data/fcm-service-account.json
+//         (that folder is already blocked from direct web access).
+define('FCM_SERVICE_ACCOUNT_PATH', __DIR__ . '/data/fcm-service-account.json');
+
 
 /* ============================================================
    Stop editing here.

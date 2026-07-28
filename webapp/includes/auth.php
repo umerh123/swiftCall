@@ -12,19 +12,59 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function is_logged_in() {
-    return !empty($_SESSION['user_id']);
+/** Pulls "Bearer xxx" out of the Authorization header, however this host
+ *  hands it to PHP (some shared hosts only expose it via getallheaders()). */
+function bearer_token() {
+    $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    if ($hdr === '' && function_exists('getallheaders')) {
+        foreach (getallheaders() as $k => $v) {
+            if (strtolower($k) === 'authorization') { $hdr = $v; break; }
+        }
+    }
+    if (preg_match('/Bearer\s+(\S+)/i', $hdr, $m)) return $m[1];
+    return '';
 }
 
-/** The full row for whoever is signed in, or null. Cached per-request. */
+/** The mobile app authenticates with a long-lived API token instead of a
+ *  cookie session. Resolves it to a user row, or null. Cached per-request. */
+function user_from_bearer_token() {
+    static $cached = false;
+    if ($cached !== false) return $cached;
+    $token = bearer_token();
+    if ($token === '') { $cached = null; return null; }
+    $s = db()->prepare("
+        SELECT u.* FROM users u
+        JOIN api_tokens t ON t.user_id = u.id
+        WHERE t.token = ? AND u.active = 1
+    ");
+    $s->execute([$token]);
+    $u = $s->fetch();
+    if ($u) {
+        db()->prepare("UPDATE api_tokens SET last_used_at = datetime('now') WHERE token = ?")->execute([$token]);
+    }
+    $cached = $u ?: null;
+    return $cached;
+}
+
+function is_logged_in() {
+    return !empty($_SESSION['user_id']) || user_from_bearer_token() !== null;
+}
+
+/** The full row for whoever is signed in, or null. Cached per-request.
+ *  Checks the session cookie first (the web app), then an API bearer
+ *  token (the mobile app) — either one is enough. */
 function current_user() {
     static $cached = false; // false = not looked up yet; null = looked up, no user
     if ($cached !== false) return $cached;
-    if (empty($_SESSION['user_id'])) { $cached = null; return null; }
-    $s = db()->prepare('SELECT * FROM users WHERE id = ? AND active = 1');
-    $s->execute([$_SESSION['user_id']]);
-    $u = $s->fetch();
-    $cached = $u ?: null;
+
+    if (!empty($_SESSION['user_id'])) {
+        $s = db()->prepare('SELECT * FROM users WHERE id = ? AND active = 1');
+        $s->execute([$_SESSION['user_id']]);
+        $u = $s->fetch();
+        if ($u) { $cached = $u; return $cached; }
+    }
+
+    $cached = user_from_bearer_token();
     return $cached;
 }
 
@@ -78,5 +118,9 @@ function csrf_token() {
 }
 
 function check_csrf($token) {
+    // Bearer-token requests (the mobile app) carry no ambient cookie, so
+    // there is nothing for a cross-site request to forge — CSRF doesn't
+    // apply to them the way it does to the cookie-based web session.
+    if (bearer_token() !== '' && user_from_bearer_token() !== null) return true;
     return !empty($_SESSION['csrf']) && hash_equals($_SESSION['csrf'], (string)$token);
 }

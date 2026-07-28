@@ -4,6 +4,13 @@ RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !=https
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Some shared hosts (CGI/FastCGI PHP) strip the Authorization header before
+# it reaches PHP — the mobile app needs it for its "Authorization: Bearer"
+# login token. Both of these re-attach it; harmless if already present.
+CGIPassAuth On
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
 # Never serve the database file
 <FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db|log)$">
   Require all denied

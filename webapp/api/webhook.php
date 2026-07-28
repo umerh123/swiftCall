@@ -6,6 +6,7 @@
  */
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/telnyx.php';
+require_once __DIR__ . '/../includes/fcm.php';
 
 db(); // make sure the schema/migration has run before anything below queries it
 
@@ -63,6 +64,13 @@ try {
                     VALUES (?, ?, ?, 'inbound', ?, 'received', 0)
                 ");
                 $s->execute([$uid, $tid, $from, $body]);
+                if ($s->rowCount() > 0) {
+                    $name = db()->prepare('SELECT name FROM contacts WHERE user_id = ? AND phone = ?');
+                    $name->execute([$uid, $from]);
+                    $display = $name->fetchColumn() ?: pretty_phone($from);
+                    $snippet = function_exists('mb_substr') ? mb_substr($body, 0, 120) : substr($body, 0, 120);
+                    fcm_notify_user($uid, $display, $snippet, ['type' => 'sms', 'phone' => $from]);
+                }
             }
             break;
 
@@ -119,8 +127,14 @@ try {
             $uid  = user_id_for_number($to);
             if ($from !== '' && $url !== '') {
                 db()->prepare('INSERT OR IGNORE INTO contacts (user_id, phone) VALUES (?, ?)')->execute([$uid, $from]);
-                db()->prepare('INSERT OR IGNORE INTO voicemails (user_id, phone, call_session_id, recording_url) VALUES (?, ?, ?, ?)')
-                    ->execute([$uid, $from, $csid, $url]);
+                $vm = db()->prepare('INSERT OR IGNORE INTO voicemails (user_id, phone, call_session_id, recording_url) VALUES (?, ?, ?, ?)');
+                $vm->execute([$uid, $from, $csid, $url]);
+                if ($vm->rowCount() > 0) {
+                    $name = db()->prepare('SELECT name FROM contacts WHERE user_id = ? AND phone = ?');
+                    $name->execute([$uid, $from]);
+                    $display = $name->fetchColumn() ?: pretty_phone($from);
+                    fcm_notify_user($uid, 'New voicemail', $display, ['type' => 'voicemail', 'phone' => $from]);
+                }
             }
             break;
     }

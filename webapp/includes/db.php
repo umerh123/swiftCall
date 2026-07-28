@@ -82,6 +82,24 @@ function db() {
             listened INTEGER DEFAULT 0,
             created_at TEXT DEFAULT (datetime('now'))
         );
+        CREATE TABLE IF NOT EXISTS api_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            token TEXT UNIQUE NOT NULL,
+            device_name TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            last_used_at TEXT
+        );
+        CREATE TABLE IF NOT EXISTS device_push_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            fcm_token TEXT UNIQUE NOT NULL,
+            platform TEXT DEFAULT 'android',
+            created_at TEXT DEFAULT (datetime('now')),
+            last_seen_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_api_tokens_user ON api_tokens(user_id);
+        CREATE INDEX IF NOT EXISTS idx_push_tokens_user ON device_push_tokens(user_id);
         CREATE INDEX IF NOT EXISTS idx_msg_phone ON messages(phone);
         CREATE INDEX IF NOT EXISTS idx_vm_phone ON voicemails(phone);
         CREATE UNIQUE INDEX IF NOT EXISTS idx_msg_tid ON messages(telnyx_id) WHERE telnyx_id IS NOT NULL;
