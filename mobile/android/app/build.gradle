@@ -117,4 +117,15 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // AppFirebaseMessagingService (this module) extends Telnyx's
+    // TelnyxFirebaseMessagingService and references FirebaseMessagingService /
+    // RemoteMessage directly. Telnyx's own module declares its Firebase
+    // dependency as `implementation`, which Gradle doesn't expose to this
+    // module's compile classpath — without this, ':app:compileReleaseKotlin'
+    // fails with "Cannot access 'FirebaseMessagingService'". Version matches
+    // the BOM @react-native-firebase/app resolves internally (see its
+    // package.json -> sdkVersions.android.firebase) so both stay consistent.
+    implementation platform('com.google.firebase:firebase-bom:34.15.0')
+    implementation 'com.google.firebase:firebase-messaging'
 }
