@@ -9,6 +9,7 @@ import { colors, radius } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
 import Icon from '../components/Icon';
+import EmptyState from '../components/EmptyState';
 import * as api from '../api/client';
 
 type Props = CompositeScreenProps<
@@ -78,12 +79,7 @@ export default function MessagesScreen({ navigation }: Props) {
             tintColor={colors.textMuted}
           />
         }
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Icon name="message-text-outline" size={34} color={colors.textFaint} />
-            <Text style={styles.emptyText}>No messages yet</Text>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState icon="message-text-outline" label="No messages yet" />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <TouchableOpacity

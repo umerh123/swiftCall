@@ -35,7 +35,7 @@ export const colors = {
   border: '#212330',
 };
 
-export const radius = { sm: 6, md: 8, lg: 10, xl: 14, pill: 999 };
+export const radius = { sm: 6, md: 8, lg: 10, xl: 14, xxl: 20, pill: 999 };
 
 export const shadow = {
   card: {

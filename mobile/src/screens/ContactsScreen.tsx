@@ -9,6 +9,7 @@ import { colors, radius, shadow } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
 import Icon from '../components/Icon';
+import EmptyState from '../components/EmptyState';
 import * as api from '../api/client';
 import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
@@ -126,12 +127,7 @@ export default function ContactsScreen({ navigation }: Props) {
         data={contacts}
         keyExtractor={(c) => String(c.id)}
         contentContainerStyle={contacts.length === 0 && styles.emptyList}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Icon name="account-outline" size={34} color={colors.textFaint} />
-            <Text style={styles.emptyText}>No contacts yet</Text>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState icon="account-outline" label="No contacts yet" />}
         renderItem={({ item }) => (
           <View style={styles.row}>
             <TouchableOpacity style={styles.rowMain} activeOpacity={0.6} onPress={() => callContact(item)}>

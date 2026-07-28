@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Animated, Easing } from 'react-native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
-import { colors, radius, shadow } from '../theme';
+import { colors, radius } from '../theme';
 import Screen from '../components/Screen';
 import Icon from '../components/Icon';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
@@ -31,6 +31,33 @@ const KEYS: [string, string][] = [
   ['0', '+'],
   ['#', ''],
 ];
+
+function PulsingDot({ color }: { color: string }) {
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 700, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 700, easing: Easing.in(Easing.ease), useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+
+  return (
+    <View style={styles.lampWrap}>
+      <Animated.View
+        style={[
+          styles.lampHalo,
+          { backgroundColor: color, opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0] }), transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 2.4] }) }] },
+        ]}
+      />
+      <View style={[styles.lamp, { backgroundColor: color }]} />
+    </View>
+  );
+}
 
 export default function DialerScreen({ navigation }: Props) {
   const [digits, setDigits] = useState('');
@@ -70,27 +97,12 @@ export default function DialerScreen({ navigation }: Props) {
   }
 
   const showError = !connected && !connecting && !!error;
+  const statusColor = connected ? colors.success : showError ? colors.danger : colors.accent;
 
   return (
     <Screen>
       <View style={styles.topBar}>
-        <TouchableOpacity
-          style={styles.statusPill}
-          disabled={connected || retrying}
-          onPress={showError ? retry : undefined}
-          activeOpacity={showError ? 0.7 : 1}
-        >
-          {retrying ? (
-            <Text style={styles.statusText}>Retrying…</Text>
-          ) : (
-            <>
-              <View style={[styles.lamp, connected && styles.lampReady, showError && styles.lampError]} />
-              <Text style={styles.statusText}>
-                {connected ? 'Ready' : showError ? 'Tap to retry' : 'Connecting…'}
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
+        <Text style={styles.wordmark}>Console</Text>
         <TouchableOpacity
           style={styles.settingsBtn}
           onPress={() => navigation.navigate('Settings')}
@@ -99,6 +111,24 @@ export default function DialerScreen({ navigation }: Props) {
           <Icon name="cog-outline" size={19} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        style={styles.statusPill}
+        disabled={connected || retrying}
+        onPress={showError ? retry : undefined}
+        activeOpacity={showError ? 0.7 : 1}
+      >
+        {retrying ? (
+          <Text style={styles.statusText}>Retrying…</Text>
+        ) : (
+          <>
+            {connecting ? <PulsingDot color={statusColor} /> : <View style={[styles.lamp, { backgroundColor: statusColor }]} />}
+            <Text style={styles.statusText}>
+              {connected ? 'Line ready' : showError ? 'Tap to retry' : 'Connecting…'}
+            </Text>
+          </>
+        )}
+      </TouchableOpacity>
 
       {showError && (
         <TouchableOpacity style={styles.errorBanner} onPress={retry} activeOpacity={0.8}>
@@ -118,7 +148,7 @@ export default function DialerScreen({ navigation }: Props) {
             style={styles.backspace}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Icon name="backspace-outline" size={22} color={colors.textMuted} />
+            <Icon name="backspace-outline" size={21} color={colors.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -128,7 +158,7 @@ export default function DialerScreen({ navigation }: Props) {
           <TouchableOpacity
             key={num}
             style={styles.key}
-            activeOpacity={0.7}
+            activeOpacity={0.55}
             onPress={() => setDigits((d) => d + num)}
             onLongPress={() => num === '0' && setDigits((d) => d + '+')}
           >
@@ -144,7 +174,7 @@ export default function DialerScreen({ navigation }: Props) {
         activeOpacity={0.85}
         disabled={!digits}
       >
-        <Icon name="phone" size={26} color="#fff" />
+        <Icon name="phone" size={24} color="#fff" />
       </TouchableOpacity>
     </Screen>
   );
@@ -156,65 +186,59 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 10,
+  },
+  wordmark: { color: colors.textFaint, fontSize: 13, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase' },
+  settingsBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    alignSelf: 'center',
+    gap: 8,
+    marginTop: 18,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
     backgroundColor: colors.panel,
     borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: radius.pill,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
   },
-  lamp: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.textGhost },
-  lampReady: {
-    backgroundColor: colors.success,
-    shadowColor: colors.success,
-    shadowOpacity: 0.7,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  lampError: { backgroundColor: colors.danger },
+  lampWrap: { width: 8, height: 8, alignItems: 'center', justifyContent: 'center' },
+  lampHalo: { position: 'absolute', width: 8, height: 8, borderRadius: 4 },
+  lamp: { width: 7, height: 7, borderRadius: 4 },
   statusText: { color: colors.textMuted, fontSize: 12.5, fontWeight: '600' },
-  settingsBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.pill,
-    backgroundColor: colors.panel,
-    borderWidth: 1,
-    borderColor: colors.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     marginHorizontal: 20,
-    marginTop: 10,
-    padding: 10,
+    marginTop: 12,
+    padding: 11,
     borderRadius: radius.md,
     backgroundColor: colors.dangerWash,
     borderWidth: 1,
     borderColor: 'rgba(220,38,38,.3)',
   },
-  errorText: { flex: 1, color: '#FFD4DA', fontSize: 12.5 },
+  errorText: { flex: 1, color: '#FFD4DA', fontSize: 12.5, lineHeight: 17 },
   displayWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 72,
-    marginTop: 28,
+    height: 68,
+    marginTop: 24,
     paddingHorizontal: 60,
   },
   display: {
-    fontSize: 38,
+    fontSize: 36,
     color: colors.text,
     fontWeight: '300',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     fontVariant: ['tabular-nums'],
   },
   backspace: { position: 'absolute', right: 24, padding: 8 },
@@ -222,39 +246,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    paddingHorizontal: 22,
-    marginTop: 8,
+    paddingHorizontal: 24,
+    marginTop: 4,
   },
   key: {
-    width: '28%',
+    width: '27%',
     aspectRatio: 1,
-    margin: '2.66%',
-    borderRadius: radius.pill,
-    backgroundColor: colors.raised,
+    margin: '3%',
+    borderRadius: radius.xxl,
+    backgroundColor: colors.panel,
     borderWidth: 1,
     borderColor: colors.lineSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    maxHeight: 74,
-    ...shadow.card,
+    maxHeight: 72,
   },
-  keyNum: { fontSize: 25, color: colors.text, fontWeight: '500' },
-  keyLetters: { fontSize: 10, color: colors.textFaint, letterSpacing: 1.5, marginTop: 3 },
+  keyNum: { fontSize: 24, color: colors.text, fontWeight: '500' },
+  keyLetters: { fontSize: 9.5, color: colors.textFaint, letterSpacing: 1.8, marginTop: 3 },
   callBtn: {
-    backgroundColor: colors.success,
+    backgroundColor: colors.accent,
     borderRadius: radius.pill,
-    width: 64,
-    height: 64,
+    width: 60,
+    height: 60,
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 22,
-    marginBottom: 20,
-    shadowColor: colors.success,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
+    marginTop: 20,
+    marginBottom: 18,
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
     shadowRadius: 16,
     elevation: 6,
   },
-  callBtnDisabled: { backgroundColor: colors.raised, shadowOpacity: 0 },
+  callBtnDisabled: { backgroundColor: colors.panel, shadowOpacity: 0 },
 });

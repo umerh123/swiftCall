@@ -5,6 +5,7 @@ import { colors, radius } from '../theme';
 import Screen from '../components/Screen';
 import Avatar from '../components/Avatar';
 import Icon from '../components/Icon';
+import EmptyState from '../components/EmptyState';
 import * as api from '../api/client';
 
 function formatWhen(iso: string): string {
@@ -84,12 +85,7 @@ export default function VoicemailScreen() {
             tintColor={colors.textMuted}
           />
         }
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Icon name="voicemail" size={34} color={colors.textFaint} />
-            <Text style={styles.emptyText}>No voicemails</Text>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState icon="voicemail" label="No voicemails" />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={() => play(item)}>
