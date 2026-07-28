@@ -1,0 +1,27 @@
+# Force https — the microphone will not work without it
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Never serve the database file
+<FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db|log)$">
+  Require all denied
+</FilesMatch>
+
+DirectoryIndex index.php
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "microphone=(self)"
+</IfModule>
+
+# Older Apache 2.2 fallback
+<IfModule !mod_authz_core.c>
+  <FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
