@@ -15,11 +15,14 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radius, shadow } from '../theme';
 import Icon from '../components/Icon';
-import { TelnyxConnectionState, TelnyxVoipClient } from '@telnyx/react-voice-commons-sdk';
+import { TelnyxVoipClient } from '@telnyx/react-voice-commons-sdk';
 import * as api from '../api/client';
 import { getServerUrl, setServerUrl, setToken, setUser, getUser, getToken } from '../storage/settings';
 import { bootVoip } from '../voip/boot';
-import { voipClient } from '../voip/client';
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -35,29 +38,22 @@ export default function LoginScreen({ navigation }: Props) {
       const [url, token, user] = await Promise.all([getServerUrl(), getToken(), getUser()]);
       if (url) setServerUrlField(url);
       if (token && user) {
-        // If the app was launched by tapping an incoming-call notification,
-        // Telnyx's native layer is already logging in to handle that call —
-        // calling bootVoip() here too would be the exact "double login"
-        // race their SDK docs warn about, so skip it in that one case.
+        // Telnyx's SDK has its own internal push-launch login path
+        // (TelnyxVoiceApp -> SessionManager.handlePushNotification, on a
+        // fixed ~100ms timer) that's meant to make bootVoip() unnecessary
+        // here — but Crashlytics confirmed it throws before ever creating
+        // a client ("Cannot read property 'TelnyxRTC' of undefined") and
+        // never retries, which is why a push-launched cold start was
+        // landing on the dial pad with no ring at all. bootVoip() reliably
+        // reaches "Line ready" every other time it's used, so it's now the
+        // real login path here too — a brief delay first (rather than
+        // running it at the exact same moment) avoids both of them
+        // mutating the same SessionManager concurrently, which is the
+        // literal "double login" crash this used to skip around; by the
+        // time this fires the vendor path has already thrown and given up.
         const launchedFromPush = await TelnyxVoipClient.isLaunchedFromPushNotification();
-        if (!launchedFromPush) {
-          await bootVoip();
-        } else {
-          // The native-side push login is entirely internal to the SDK and
-          // has no visible failure signal on our end — if it silently
-          // doesn't pan out, this is the fallback that gets the line
-          // connected anyway, even though the ring that triggered this
-          // launch will already be gone by then.
-          setTimeout(() => {
-            if (
-              voipClient.currentConnectionState !== TelnyxConnectionState.CONNECTED &&
-              voipClient.currentConnectionState !== TelnyxConnectionState.CONNECTING &&
-              !voipClient.currentActiveCall
-            ) {
-              bootVoip();
-            }
-          }, 5000);
-        }
+        if (launchedFromPush) await wait(700);
+        await bootVoip();
         navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         return;
       }

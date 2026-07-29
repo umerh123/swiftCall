@@ -8,6 +8,9 @@ type CallUtilsModule = {
   openFullScreenIntentSettings(): void;
   acquireProximityWakeLock(): void;
   releaseProximityWakeLock(): void;
+  setCallAudioMode(): void;
+  clearCallAudioMode(): void;
+  setSpeakerphoneOn(on: boolean): void;
 };
 
 const noop = () => {};
@@ -27,6 +30,9 @@ const CallUtils: CallUtilsModule =
         openFullScreenIntentSettings: noop,
         acquireProximityWakeLock: noop,
         releaseProximityWakeLock: noop,
+        setCallAudioMode: noop,
+        clearCallAudioMode: noop,
+        setSpeakerphoneOn: noop,
       };
 
 export default CallUtils;

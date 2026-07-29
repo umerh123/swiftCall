@@ -17,6 +17,11 @@ export async function loginToVoip(fcmToken?: string): Promise<void> {
   const config = createCredentialConfig(creds.login, creds.password, {
     pushNotificationDeviceToken: fcmToken,
     enableMissedCallNotifications: true,
+    // Matches the web dialer (webapp/assets/app.js passes trickleIce: true
+    // on every call) — candidates go out as they're found instead of all
+    // at once after a full gathering pause, which matters most exactly
+    // where it was reported as unstable: weak/high-latency networks.
+    useTrickleIce: true,
   });
   await voipClient.login(config);
 }

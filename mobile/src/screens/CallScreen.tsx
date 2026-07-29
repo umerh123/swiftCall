@@ -40,6 +40,15 @@ export default function CallScreen({ navigation }: Props) {
       navigation.goBack();
       return;
     }
+
+    // Android only routes audio through the device's hardware echo
+    // canceller once the session is explicitly in "communication" mode —
+    // left at the default, the mic picks the earpiece output right back
+    // up, which is the loud echo reported during calls. Set for the whole
+    // time this screen is up, not just once media is flowing, so it's
+    // never a beat late.
+    CallUtils.setCallAudioMode();
+
     const subs = [
       call.duration$.subscribe(setDuration),
       call.isMuted$.subscribe(setMuted),
@@ -62,6 +71,7 @@ export default function CallScreen({ navigation }: Props) {
     return () => {
       subs.forEach((s) => s.unsubscribe());
       CallUtils.releaseProximityWakeLock();
+      CallUtils.clearCallAudioMode();
     };
   }, [call]);
 

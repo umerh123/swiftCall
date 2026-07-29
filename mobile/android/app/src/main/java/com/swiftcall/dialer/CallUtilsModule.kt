@@ -30,6 +30,7 @@ class CallUtilsModule(reactContext: ReactApplicationContext) :
 
     private var toneGenerator: ToneGenerator? = null
     private var proximityWakeLock: PowerManager.WakeLock? = null
+    private var previousAudioMode: Int? = null
 
     private fun toneFor(digit: String): Int? = when (digit) {
         "0" -> ToneGenerator.TONE_DTMF_0
@@ -124,6 +125,42 @@ class CallUtilsModule(reactContext: ReactApplicationContext) :
         try {
             proximityWakeLock?.let { if (it.isHeld) it.release() }
             proximityWakeLock = null
+        } catch (_: Exception) {
+        }
+    }
+
+    // react-native-webrtc captures audio fine on its own, but Android only
+    // routes that through the device's hardware echo canceller / noise
+    // suppression when the audio session is explicitly in "communication"
+    // mode — left at the default MODE_NORMAL (a plain media-playback mode),
+    // the mic picks up the earpiece output right back up, which is exactly
+    // the loud echo reported during calls.
+    @ReactMethod
+    fun setCallAudioMode() {
+        try {
+            val am = reactApplicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (previousAudioMode == null) previousAudioMode = am.mode
+            am.mode = AudioManager.MODE_IN_COMMUNICATION
+            am.isSpeakerphoneOn = false
+        } catch (_: Exception) {
+        }
+    }
+
+    @ReactMethod
+    fun clearCallAudioMode() {
+        try {
+            val am = reactApplicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            am.mode = previousAudioMode ?: AudioManager.MODE_NORMAL
+            previousAudioMode = null
+        } catch (_: Exception) {
+        }
+    }
+
+    @ReactMethod
+    fun setSpeakerphoneOn(on: Boolean) {
+        try {
+            val am = reactApplicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            am.isSpeakerphoneOn = on
         } catch (_: Exception) {
         }
     }
