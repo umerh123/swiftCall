@@ -1,0 +1,16 @@
+{
+  "current": {
+    "color_brand": "#53ed00",
+    "color_brand_ink": "#008c00",
+    "color_ink": "#090909",
+    "color_background": "#fdfdfd"
+  },
+  "presets": {
+    "Default": {
+      "color_brand": "#53ed00",
+      "color_brand_ink": "#008c00",
+      "color_ink": "#090909",
+      "color_background": "#fdfdfd"
+    }
+  }
+}

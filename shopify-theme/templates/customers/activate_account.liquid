@@ -1,0 +1,18 @@
+<div class="gl-wrap gl-page" style="max-width:28rem;">
+  <h1 class="gl-display">Activate Account</h1>
+  {%- form 'activate_customer_password', style: 'margin-top:2rem;' -%}
+    {%- if form.errors -%}
+      <p style="color:#b00020; margin-bottom:1rem;">{{ form.errors | default_errors }}</p>
+    {%- endif -%}
+    <div class="gl-product__option">
+      <label for="ActivatePassword">Password</label>
+      <input type="password" name="customer[password]" id="ActivatePassword" required style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="ActivatePasswordConfirm">Confirm password</label>
+      <input type="password" name="customer[password_confirmation]" id="ActivatePasswordConfirm" required style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <button type="submit" class="gl-btn gl-btn--black" style="justify-content:center;">Activate Account</button>
+    <button type="submit" name="decline" class="gl-btn gl-btn--outline-black" style="justify-content:center; margin-left:0.75rem;">Decline Invitation</button>
+  {%- endform -%}
+</div>

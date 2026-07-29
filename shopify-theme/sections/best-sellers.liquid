@@ -1,0 +1,95 @@
+{%- liquid
+  assign demo_images = 'gl-cat-shorts.jpg,gl-cat-sets.jpg,gl-cat-accessories.jpg,gl-cat-hoodies.jpg' | split: ','
+  assign collection = section.settings.collection
+-%}
+<section class="gl-section">
+  <div class="gl-wrap">
+    <div class="gl-section-head">
+      <div>
+        <div class="gl-eyebrow">{{ section.settings.eyebrow }}</div>
+        <h2 class="gl-display">{{ section.settings.heading }}</h2>
+      </div>
+      <a href="{{ section.settings.cta_url }}" class="gl-section-cta">
+        {{ section.settings.cta_label }} {% render 'icon', name: 'arrow-right' %}
+      </a>
+    </div>
+
+    <div class="gl-grid-2">
+      {%- if collection != blank and collection.products.size > 0 -%}
+        {%- for product in collection.products limit: 4 -%}
+          {%- render 'product-card', product: product -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign fallback_idx = forloop.index0 | modulo: demo_images.size
+          -%}
+          <div {{ block.shopify_attributes }}>
+            {%- render 'product-card',
+              demo_image: block.settings.image,
+              demo_fallback_image: demo_images[fallback_idx],
+              demo_name: block.settings.name,
+              demo_price: block.settings.price,
+              demo_tag: block.settings.tag,
+              demo_url: block.settings.url
+            -%}
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Best sellers",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Fan Favorites" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Best Sellers" },
+    { "type": "text", "id": "cta_label", "label": "Link label", "default": "Shop Best Sellers" },
+    { "type": "url", "id": "cta_url", "label": "Link url", "default": "/collections/all" },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "When set, shows real products from this collection instead of the placeholder demo cards below."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "demo_product",
+      "name": "Demo product",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Product name" },
+        { "type": "text", "id": "price", "label": "Price (number only)", "default": "34" },
+        {
+          "type": "select",
+          "id": "tag",
+          "label": "Tag",
+          "options": [
+            { "value": "", "label": "None" },
+            { "value": "New", "label": "New" },
+            { "value": "Restock", "label": "Restock" },
+            { "value": "Best", "label": "Best" },
+            { "value": "Last Piece", "label": "Last Piece" }
+          ],
+          "default": "Best"
+        },
+        { "type": "url", "id": "url", "label": "Link", "default": "/collections/all" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "default": {
+    "settings": {},
+    "blocks": [
+      { "type": "demo_product", "settings": { "name": "Blackout Cargo Shorts", "price": "54", "tag": "Last Piece", "url": "/collections/shorts" } },
+      { "type": "demo_product", "settings": { "name": "Locker Set — Black on Black", "price": "118", "tag": "New", "url": "/collections/all" } },
+      { "type": "demo_product", "settings": { "name": "Chain Wallet — Silver", "price": "28", "tag": "Best", "url": "/collections/accessories-all-items" } },
+      { "type": "demo_product", "settings": { "name": "Essential Hoodie — Jet", "price": "72", "tag": "Best", "url": "/collections/hoodies" } }
+    ]
+  }
+}
+{% endschema %}

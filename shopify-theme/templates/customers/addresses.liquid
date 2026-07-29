@@ -1,0 +1,46 @@
+<div class="gl-wrap gl-page">
+  <div class="gl-page__breadcrumb">
+    <a href="{{ routes.account_url }}">My Account</a> / Addresses
+  </div>
+  <h1 class="gl-display">Addresses</h1>
+
+  <div class="gl-blog-grid" style="margin-top:2rem;">
+    {%- for address in customer.addresses -%}
+      <div style="border:1px solid var(--border); padding:1.5rem;">
+        {{ address | format_address }}
+        <div style="margin-top:1rem; display:flex; gap:0.75rem;">
+          <a href="{{ routes.account_addresses_url }}/{{ address.id }}/edit" style="font-size:0.8125rem; text-decoration:underline;">Edit</a>
+          {%- form 'delete_customer_address', address -%}
+            <input type="hidden" name="address_id" value="{{ address.id }}">
+            <button type="submit" style="font-size:0.8125rem; text-decoration:underline;">Delete</button>
+          {%- endform -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <h2 style="font-size:1.25rem; text-transform:none; font-family:var(--font-sans); font-weight:700; margin: 2.5rem 0 1rem;">Add a new address</h2>
+  {%- form 'customer_address', customer.new_address -%}
+    <div class="gl-product__option">
+      <label for="AddressFirstName">First name</label>
+      <input type="text" name="address[first_name]" id="AddressFirstName" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="AddressLastName">Last name</label>
+      <input type="text" name="address[last_name]" id="AddressLastName" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="AddressAddress1">Address</label>
+      <input type="text" name="address[address1]" id="AddressAddress1" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="AddressCity">City</label>
+      <input type="text" name="address[city]" id="AddressCity" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="AddressZip">Postal / Zip code</label>
+      <input type="text" name="address[zip]" id="AddressZip" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <button type="submit" class="gl-btn gl-btn--black" style="justify-content:center;">Save Address</button>
+  {%- endform -%}
+</div>

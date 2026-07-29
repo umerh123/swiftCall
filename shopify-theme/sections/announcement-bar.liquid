@@ -1,0 +1,45 @@
+{%- liquid
+  assign items = section.blocks
+-%}
+<div class="gl-announce">
+  <div class="gl-announce__track">
+    {%- for n in (1..4) -%}
+      {%- for block in items -%}
+        <span class="gl-announce__item" {{ block.shopify_attributes }}>
+          <span class="gl-announce__dot"></span>
+          {{ block.settings.text }}
+        </span>
+      {%- endfor -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": "div",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Message",
+          "default": "FREE SHIPPING ON ORDERS $100+"
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      { "type": "message", "settings": { "text": "FREE SHIPPING ON ORDERS $100+" } },
+      { "type": "message", "settings": { "text": "NEW DROPS WEEKLY" } },
+      { "type": "message", "settings": { "text": "KLARNA · AFTERPAY · SHOP PAY" } },
+      { "type": "message", "settings": { "text": "SHIPPING FROM DOWNTOWN LA" } }
+    ]
+  }
+}
+{% endschema %}

@@ -1,0 +1,69 @@
+<section class="gl-section">
+  <div class="gl-wrap gl-nl-grid">
+    <div class="gl-nl-panel">
+      <h3 class="gl-display">{{ section.settings.newsletter_heading }}</h3>
+      <p>{{ section.settings.newsletter_copy }}</p>
+
+      {%- form 'customer', id: 'gl-newsletter-form', class: 'gl-nl-form' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        {%- if form.posted_successfully? -%}
+          <p style="margin:0;">Thanks — you're on the list.</p>
+        {%- else -%}
+          <input
+            type="email"
+            name="contact[email]"
+            id="ContactFooter-email"
+            required
+            placeholder="Enter your email"
+            value="{{ form.email }}"
+          >
+          <button type="submit">Subscribe</button>
+        {%- endif -%}
+      {%- endform -%}
+
+      <div class="gl-nl-social">
+        {%- if section.settings.instagram_url != blank -%}
+          <a href="{{ section.settings.instagram_url }}">{% render 'icon', name: 'instagram' %}Instagram</a>
+        {%- endif -%}
+        {%- if section.settings.facebook_url != blank -%}
+          <a href="{{ section.settings.facebook_url }}">{% render 'icon', name: 'facebook' %}Facebook</a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="gl-local-panel">
+      <div class="gl-eyebrow">{{ section.settings.pickup_eyebrow }}</div>
+      <h3 class="gl-display">{{ section.settings.pickup_heading | newline_to_br }}</h3>
+      <div class="gl-local-panel__addr">
+        <p class="is-strong">{{ section.settings.address_line1 }}</p>
+        <p>{{ section.settings.address_line2 }}</p>
+        <p class="is-hours">{{ section.settings.hours }}</p>
+      </div>
+      <div class="gl-local-panel__cta">
+        <a href="{{ section.settings.directions_url }}" class="gl-btn gl-btn--outline-black">
+          Get Directions {% render 'icon', name: 'arrow-right' %}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter + local pickup",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "newsletter_heading", "label": "Newsletter heading", "default": "Stay In The Loop" },
+    { "type": "text", "id": "newsletter_copy", "label": "Newsletter copy", "default": "Online exclusive deals, first-look at drops, and mystery-bag alerts." },
+    { "type": "url", "id": "instagram_url", "label": "Instagram URL", "default": "https://instagram.com/gearlockerla" },
+    { "type": "url", "id": "facebook_url", "label": "Facebook URL", "default": "https://www.facebook.com/gearlockerla" },
+    { "type": "text", "id": "pickup_eyebrow", "label": "Pickup eyebrow", "default": "Visit The Locker" },
+    { "type": "textarea", "id": "pickup_heading", "label": "Pickup heading", "default": "Local Pickup\nAvailable" },
+    { "type": "text", "id": "address_line1", "label": "Address line 1", "default": "1221 Maple Avenue" },
+    { "type": "text", "id": "address_line2", "label": "Address line 2", "default": "Los Angeles, CA 90015" },
+    { "type": "text", "id": "hours", "label": "Hours", "default": "Mon–Sun · 9:00am – 6:00pm" },
+    { "type": "url", "id": "directions_url", "label": "Directions link", "default": "https://maps.google.com/?daddr=1221%20Maple%20Ave%20Los%20Angeles,%20CA%2090015" }
+  ],
+  "presets": [{ "name": "Newsletter + local pickup" }]
+}
+{% endschema %}

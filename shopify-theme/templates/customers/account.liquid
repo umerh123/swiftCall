@@ -1,0 +1,34 @@
+<div class="gl-wrap gl-page">
+  <div class="gl-section-head">
+    <h1 class="gl-display">My Account</h1>
+    {%- form 'customer_logout' -%}
+      <button type="submit" class="gl-section-cta" style="border:none; background:none;">Log Out</button>
+    {%- endform -%}
+  </div>
+
+  <h2 style="font-size:1.25rem; text-transform:none; font-family:var(--font-sans); font-weight:700; margin-bottom:1rem;">Order History</h2>
+
+  {%- if customer.orders.size == 0 -%}
+    <div class="gl-empty">You haven't placed any orders yet.</div>
+  {%- else -%}
+    <table class="gl-cart-table">
+      <thead>
+        <tr><th>Order</th><th>Date</th><th>Payment</th><th>Fulfillment</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+        {%- for order in customer.orders -%}
+          <tr>
+            <td><a href="{{ order.customer_url }}">{{ order.name }}</a></td>
+            <td>{{ order.created_at | date: "%b %d, %Y" }}</td>
+            <td>{{ order.financial_status_label }}</td>
+            <td>{{ order.fulfillment_status_label }}</td>
+            <td>{{ order.total_price | money }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  {%- endif -%}
+
+  <h2 style="font-size:1.25rem; text-transform:none; font-family:var(--font-sans); font-weight:700; margin: 2.5rem 0 1rem;">Addresses</h2>
+  <p><a href="{{ routes.account_addresses_url }}" class="gl-btn gl-btn--outline-black">Manage Addresses</a></p>
+</div>

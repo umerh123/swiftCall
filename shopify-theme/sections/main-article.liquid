@@ -1,0 +1,24 @@
+<div class="gl-wrap gl-page">
+  <div class="gl-page__breadcrumb">
+    <a href="{{ blog.url }}">{{ blog.title }}</a>
+  </div>
+  <h1 class="gl-display">{{ article.title }}</h1>
+  <div class="gl-blog-card__date" style="margin-bottom:2rem;">{{ article.published_at | date: "%B %d, %Y" }}{% if article.author != blank %} · {{ article.author }}{% endif %}</div>
+
+  {%- if article.image -%}
+    <div class="gl-editorial__media" style="aspect-ratio: 16/9; margin-bottom: 2rem;">
+      <img src="{{ article.image | image_url: width: 1400 }}" alt="{{ article.title | escape }}">
+    </div>
+  {%- endif -%}
+
+  <div class="gl-prose">
+    {{ article.content }}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Article page",
+  "settings": []
+}
+{% endschema %}

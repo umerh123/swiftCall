@@ -1,0 +1,50 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Gear Locker LA",
+    "theme_author": "Custom build",
+    "theme_version": "1.0.0",
+    "theme_documentation_url": "",
+    "theme_support_url": ""
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_brand",
+        "label": "Brand (neon green)",
+        "default": "#53ed00"
+      },
+      {
+        "type": "color",
+        "id": "color_brand_ink",
+        "label": "Brand ink (darker green, used for text/links)",
+        "default": "#008c00"
+      },
+      {
+        "type": "color",
+        "id": "color_ink",
+        "label": "Ink (near-black text)",
+        "default": "#090909"
+      },
+      {
+        "type": "color",
+        "id": "color_background",
+        "label": "Page background",
+        "default": "#fdfdfd"
+      }
+    ]
+  },
+  {
+    "name": "Favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon image",
+        "info": "Displayed at 32x32px"
+      }
+    ]
+  }
+]

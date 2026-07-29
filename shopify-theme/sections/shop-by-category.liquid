@@ -1,0 +1,72 @@
+{%- liquid
+  assign fallback_images = 'gl-cat-tees.jpg,gl-cat-jeans.jpg,gl-cat-hoodies.jpg,gl-cat-shorts.jpg,gl-cat-sets.jpg,gl-cat-accessories.jpg' | split: ','
+-%}
+<section class="gl-section">
+  <div class="gl-wrap">
+    <div class="gl-section-head">
+      <div>
+        <div class="gl-eyebrow">{{ section.settings.eyebrow }}</div>
+        <h2 class="gl-display">{{ section.settings.heading }}</h2>
+      </div>
+      <a href="{{ section.settings.cta_url }}" class="gl-section-cta">
+        {{ section.settings.cta_label }} {% render 'icon', name: 'arrow-right' %}
+      </a>
+    </div>
+
+    <div class="gl-cat-grid">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign fallback_idx = forloop.index0 | modulo: fallback_images.size
+        -%}
+        <a href="{{ block.settings.url }}" class="gl-cat-tile" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            <img src="{{ block.settings.image | image_url: width: 900 }}" alt="{{ block.settings.name | escape }}" loading="lazy" width="900" height="1100">
+          {%- else -%}
+            <img src="{{ fallback_images[fallback_idx] | asset_url }}" alt="{{ block.settings.name | escape }}" loading="lazy" width="900" height="1100">
+          {%- endif -%}
+          <div class="gl-cat-tile__scrim"></div>
+          <div class="gl-cat-tile__row">
+            <h3 class="gl-display">{{ block.settings.name }}</h3>
+            <span class="gl-cat-tile__arrow">{% render 'icon', name: 'arrow-right' %}</span>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shop by category",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Curated · By Category" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop The Locker" },
+    { "type": "text", "id": "cta_label", "label": "Link label", "default": "Everything" },
+    { "type": "url", "id": "cta_url", "label": "Link url", "default": "/collections/all" }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Category" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "default": {
+    "settings": {},
+    "blocks": [
+      { "type": "category", "settings": { "name": "Graphic Tees", "url": "/collections/t-shirt" } },
+      { "type": "category", "settings": { "name": "Baggy Denim", "url": "/collections/baggy-jeans" } },
+      { "type": "category", "settings": { "name": "Hoodies", "url": "/collections/hoodies" } },
+      { "type": "category", "settings": { "name": "Shorts", "url": "/collections/shorts" } },
+      { "type": "category", "settings": { "name": "Matching Sets", "url": "/collections/all" } },
+      { "type": "category", "settings": { "name": "Accessories", "url": "/collections/accessories-all-items" } }
+    ]
+  }
+}
+{% endschema %}

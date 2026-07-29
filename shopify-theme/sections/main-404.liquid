@@ -1,0 +1,17 @@
+<div class="gl-wrap gl-page" style="text-align:center;">
+  <div class="gl-eyebrow" style="justify-content:center;">404</div>
+  <h1 class="gl-display">Page Not Found</h1>
+  <p class="gl-prose" style="margin: 1rem auto 2rem; max-width: 32rem;">
+    The page you're looking for doesn't exist or has been moved.
+  </p>
+  <a href="{{ routes.root_url }}" class="gl-btn gl-btn--black">
+    Back To Home {% render 'icon', name: 'arrow-right' %}
+  </a>
+</div>
+
+{% schema %}
+{
+  "name": "404 page",
+  "settings": []
+}
+{% endschema %}

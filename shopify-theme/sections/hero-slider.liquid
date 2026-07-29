@@ -1,0 +1,168 @@
+{%- liquid
+  assign fallback_images = 'gl-hero-1.jpg,gl-hero-2.jpg,gl-hero-3.jpg' | split: ','
+-%}
+<section class="gl-hero" data-gl-hero data-interval="{{ section.settings.autoplay_ms }}" data-total="{{ section.blocks.size }}">
+  <div class="gl-hero__stage">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign fallback_idx = forloop.index0 | modulo: fallback_images.size
+        assign fallback_image = fallback_images[fallback_idx]
+      -%}
+      {%- if block.settings.image != blank -%}
+        <img
+          src="{{ block.settings.image | image_url: width: 1920 }}"
+          srcset="{{ block.settings.image | image_url: width: 960 }} 960w, {{ block.settings.image | image_url: width: 1920 }} 1920w"
+          sizes="100vw"
+          alt=""
+          width="1920" height="1104"
+          class="gl-hero__slide{% if forloop.first %} is-active gl-anim{% endif %}"
+          data-gl-slide
+          loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+      {%- else -%}
+        <img
+          src="{{ fallback_image | asset_url }}"
+          alt=""
+          width="1920" height="1104"
+          class="gl-hero__slide{% if forloop.first %} is-active gl-anim{% endif %}"
+          data-gl-slide
+          loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+      {%- endif -%}
+    {%- endfor -%}
+
+    <div class="gl-hero__scrim"></div>
+
+    <div class="gl-hero__content">
+      {%- for block in section.blocks -%}
+        {%- assign align_right = block.settings.align == 'right' -%}
+        <div class="gl-hero__panel{% if forloop.first %} is-active{% endif %}{% if align_right %} is-align-right{% endif %}" data-gl-panel>
+          <div class="gl-hero__eyebrow">
+            {% render 'icon', name: 'sparkles' %} {{ block.settings.eyebrow }}
+          </div>
+          <h1 class="gl-hero__title gl-display">{{ block.settings.heading | newline_to_br }}</h1>
+          <p class="gl-hero__sub">{{ block.settings.subtext }}</p>
+          <div class="gl-hero__ctas">
+            <a href="{{ block.settings.cta_url }}" class="gl-btn gl-btn--white is-wide">
+              {{ block.settings.cta_label }} {% render 'icon', name: 'arrow-right', class: 'gl-icon gl-icon--translate' %}
+            </a>
+            {%- if section.settings.secondary_cta_label != blank -%}
+              <a href="{{ section.settings.secondary_cta_url }}" class="gl-btn gl-btn--outline-white">
+                {{ section.settings.secondary_cta_label }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <button type="button" class="gl-hero__arrow gl-hero__arrow--prev" data-gl-prev aria-label="Previous slide">
+      {% render 'icon', name: 'chevron-left' %}
+    </button>
+    <button type="button" class="gl-hero__arrow gl-hero__arrow--next" data-gl-next aria-label="Next slide">
+      {% render 'icon', name: 'chevron-right' %}
+    </button>
+
+    <div class="gl-hero__dots">
+      {%- for block in section.blocks -%}
+        <button type="button" class="gl-hero__dot{% if forloop.first %} is-active{% endif %}" data-gl-dot="{{ forloop.index0 }}" aria-label="Slide {{ forloop.index }}"></button>
+      {%- endfor -%}
+    </div>
+    <div class="gl-hero__counter" data-gl-counter>01 / {{ section.blocks.size | prepend: '0' | slice: -2, 2 }}</div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero slider",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "autoplay_ms",
+      "label": "Autoplay interval (ms)",
+      "min": 2000,
+      "max": 10000,
+      "step": 500,
+      "default": 6000
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_label",
+      "label": "Secondary button label",
+      "default": "Shop All"
+    },
+    {
+      "type": "url",
+      "id": "secondary_cta_url",
+      "label": "Secondary button link",
+      "default": "/collections/all"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Just Dropped" },
+        { "type": "textarea", "id": "heading", "label": "Heading (line break = new line)", "default": "Built For\nThe Streets" },
+        { "type": "text", "id": "subtext", "label": "Subtext", "default": "New arrivals every week." },
+        { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop New Arrivals" },
+        { "type": "url", "id": "cta_url", "label": "Button link" },
+        {
+          "type": "select",
+          "id": "align",
+          "label": "Text alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "default": {
+    "settings": {},
+    "blocks": [
+      {
+        "type": "slide",
+        "settings": {
+          "eyebrow": "Just Dropped · Week 34",
+          "heading": "Built For\nThe Streets",
+          "subtext": "New arrivals every week. Stacked denim, oversized tees, chains.",
+          "cta_label": "Shop New Arrivals",
+          "cta_url": "/collections/just-dropped",
+          "align": "left"
+        }
+      },
+      {
+        "type": "slide",
+        "settings": {
+          "eyebrow": "Womens · Cropped Fits",
+          "heading": "Cropped &\nUncompromised",
+          "subtext": "Cropped hoodies paired with the baggiest denim in the city.",
+          "cta_label": "Shop Cropped",
+          "cta_url": "/collections/cropped-tees",
+          "align": "right"
+        }
+      },
+      {
+        "type": "slide",
+        "settings": {
+          "eyebrow": "BOGO 1/2 Price · Ends Soon",
+          "heading": "Two For\nThe Price",
+          "subtext": "Buy one, get one half off on selected graphic tees and hoodies.",
+          "cta_label": "Shop The Deal",
+          "cta_url": "/collections/street-steals-tees-24-99-under",
+          "align": "left"
+        }
+      }
+    ]
+  }
+}
+{% endschema %}

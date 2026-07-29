@@ -1,0 +1,44 @@
+<div class="gl-wrap gl-page" style="max-width:28rem;">
+  <h1 class="gl-display">Login</h1>
+
+  {%- form 'customer_login', class: 'gl-nl-form', style: 'flex-direction:column; margin-top:2rem;' -%}
+    {%- if form.errors -%}
+      <p style="color:#b00020; margin-bottom:1rem;">{{ form.errors | default_errors }}</p>
+    {%- endif -%}
+
+    <div class="gl-product__option">
+      <label for="CustomerEmail">Email</label>
+      <select style="display:none;"></select>
+      <input type="email" name="customer[email]" id="CustomerEmail" required style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+
+    <div class="gl-product__option">
+      <label for="CustomerPassword">Password</label>
+      <input type="password" name="customer[password]" id="CustomerPassword" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+
+    <button type="submit" class="gl-btn gl-btn--black" style="justify-content:center;">Sign In</button>
+
+    <a href="#" onclick="document.getElementById('RecoverPassword').style.display='block'; return false;" style="margin-top:1rem; font-size:0.875rem; text-decoration:underline;">
+      Forgot your password?
+    </a>
+  {%- endform -%}
+
+  <div id="RecoverPassword" style="display:none; margin-top:2rem; border-top:1px solid var(--border); padding-top:2rem;">
+    {%- form 'recover_customer_password' -%}
+      {%- if form.posted_successfully? -%}
+        <p>If that email exists, a reset link is on its way.</p>
+      {%- else -%}
+        <label for="RecoverEmail" style="display:block; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.5rem;">Email</label>
+        <input type="email" name="email" id="RecoverEmail" required style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border); margin-bottom:1rem;">
+        <button type="submit" class="gl-btn gl-btn--outline-black" style="justify-content:center; width:100%;">Reset Password</button>
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+
+  {%- if shop.customer_accounts_enabled and shop.checkout.guest_login == false -%}
+    <p style="margin-top:2rem; font-size:0.875rem;">
+      New here? <a href="{{ routes.account_register_url }}" style="text-decoration:underline;">Create an account</a>
+    </p>
+  {%- endif -%}
+</div>

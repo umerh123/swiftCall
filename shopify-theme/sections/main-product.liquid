@@ -1,0 +1,124 @@
+<div class="gl-wrap gl-page">
+  <div class="gl-page__breadcrumb">
+    <a href="{{ routes.all_products_collection_url }}">Shop</a> /
+    {{ product.title }}
+  </div>
+
+  {%- assign current_variant = product.selected_or_first_available_variant -%}
+
+  <div class="gl-product">
+    <div>
+      <div class="gl-product__media">
+        {%- if product.featured_media -%}
+          <img
+            id="ProductMainImage"
+            src="{{ product.featured_media.preview_image | image_url: width: 1000 }}"
+            alt="{{ product.featured_media.alt | default: product.title | escape }}"
+          >
+        {%- else -%}
+          {{ 'product-1' | placeholder_svg_tag }}
+        {%- endif -%}
+      </div>
+      {%- if product.media.size > 1 -%}
+        <div class="gl-product__thumbs">
+          {%- for media in product.media -%}
+            <a href="{{ media.preview_image | image_url: width: 1000 }}" data-gl-thumb class="{% if forloop.first %}is-active{% endif %}">
+              <img src="{{ media.preview_image | image_url: width: 200 }}" alt="{{ media.alt | escape }}">
+            </a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="gl-product__info">
+      <h1 class="gl-display">{{ product.title }}</h1>
+      <div class="gl-product__price">
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <s>{{ current_variant.compare_at_price | money }}</s>
+        {%- endif -%}
+        {{ current_variant.price | money }}
+      </div>
+
+      {%- form 'product', product, id: 'ProductForm' -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" data-gl-variant-input>
+
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="gl-product__option">
+              <label for="Option-{{ option.position }}">{{ option.name }}</label>
+              <select id="Option-{{ option.position }}" data-gl-option-index="{{ forloop.index0 }}">
+                {%- for value in option.values -%}
+                  <option value="{{ value | escape }}" {% if value == option.selected_value %}selected{% endif %}>{{ value }}</option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        <div class="gl-product__qty">
+          <label for="Quantity">Qty</label>
+          <input type="number" id="Quantity" name="quantity" value="1" min="1">
+        </div>
+
+        <button type="submit" class="gl-btn gl-btn--black gl-product__submit" {% unless current_variant.available %}disabled{% endunless %}>
+          {%- if current_variant.available -%}
+            Add To Cart {% render 'icon', name: 'shopping-bag' %}
+          {%- else -%}
+            Sold Out
+          {%- endif -%}
+        </button>
+      {%- endform -%}
+
+      {%- if product.description != blank -%}
+        <div class="gl-product__description gl-prose">
+          {{ product.description }}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var variants = {{ product.variants | json }};
+    var form = document.getElementById('ProductForm');
+    if (!form) return;
+    var selects = form.querySelectorAll('[data-gl-option-index]');
+    var input = form.querySelector('[data-gl-variant-input]');
+
+    function currentOptions() {
+      return Array.prototype.map.call(selects, function (s) { return s.value; });
+    }
+
+    function findVariant(options) {
+      return variants.find(function (v) {
+        return v.options.every(function (o, i) { return o === options[i]; });
+      });
+    }
+
+    selects.forEach(function (select) {
+      select.addEventListener('change', function () {
+        var match = findVariant(currentOptions());
+        if (match) input.value = match.id;
+      });
+    });
+
+    var thumbs = document.querySelectorAll('[data-gl-thumb]');
+    var mainImg = document.getElementById('ProductMainImage');
+    thumbs.forEach(function (thumb) {
+      thumb.addEventListener('click', function (e) {
+        e.preventDefault();
+        thumbs.forEach(function (t) { t.classList.remove('is-active'); });
+        thumb.classList.add('is-active');
+        if (mainImg) mainImg.src = thumb.getAttribute('href');
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product page",
+  "settings": []
+}
+{% endschema %}

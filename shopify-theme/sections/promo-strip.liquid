@@ -1,0 +1,47 @@
+<section class="gl-promo">
+  <div class="gl-wrap gl-promo__grid">
+    <div>
+      <div class="gl-promo__badge">{{ section.settings.badge }}</div>
+      <h2 class="gl-promo__title gl-display">
+        {{ section.settings.heading | newline_to_br }} <span class="gl-accent">{{ section.settings.accent }}</span>
+      </h2>
+      <p class="gl-promo__copy">{{ section.settings.copy }}</p>
+      <div class="gl-promo__ctas">
+        <a href="{{ section.settings.cta_url }}" class="gl-btn gl-btn--brand">
+          {{ section.settings.cta_label }} {% render 'icon', name: 'arrow-right' %}
+        </a>
+        {%- if section.settings.secondary_cta_label != blank -%}
+          <a href="{{ section.settings.secondary_cta_url }}" class="gl-btn gl-btn--outline-white-thin">
+            {{ section.settings.secondary_cta_label }}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+    <div class="gl-promo__media">
+      {%- if section.settings.image != blank -%}
+        <img src="{{ section.settings.image | image_url: width: 1200 }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+      {%- else -%}
+        <img src="{{ 'gl-hero-1.jpg' | asset_url }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Promo strip",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "badge", "label": "Badge", "default": "Limited Time" },
+    { "type": "textarea", "id": "heading", "label": "Heading", "default": "Buy One,\nGet One" },
+    { "type": "text", "id": "accent", "label": "Accent word", "default": "½ Price" },
+    { "type": "text", "id": "copy", "label": "Copy", "default": "Auto-applied at checkout on selected graphic tees, crops, and hoodies. New styles added weekly — don't sleep." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop The BOGO" },
+    { "type": "url", "id": "cta_url", "label": "Button link", "default": "/collections/street-steals-tees-24-99-under" },
+    { "type": "text", "id": "secondary_cta_label", "label": "Secondary button label", "default": "Try A Mystery Bag" },
+    { "type": "url", "id": "secondary_cta_url", "label": "Secondary button link", "default": "/collections/mystery" },
+    { "type": "image_picker", "id": "image", "label": "Image" }
+  ],
+  "presets": [{ "name": "Promo strip" }]
+}
+{% endschema %}

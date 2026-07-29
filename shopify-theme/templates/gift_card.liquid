@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ shop.name }} — Gift Card</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;700;900&display=swap">
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
+    {%- if gift_card.enabled == false or gift_card.expired -%}
+      <meta name="robots" content="noindex">
+    {%- endif -%}
+  </head>
+  <body class="gl-body" style="background: var(--secondary);">
+    <div class="gl-wrap gl-page" style="max-width: 640px; text-align:center;">
+      <div class="gl-eyebrow" style="justify-content:center;">{{ shop.name }} Gift Card</div>
+
+      <div style="background:#fff; border:1px solid var(--border); padding:3rem 2rem; margin-top:1.5rem;">
+        <h1 class="gl-display" style="font-size:3rem;">
+          {{ gift_card.balance | money }}
+        </h1>
+
+        {%- if gift_card.expired -%}
+          <p style="margin-top:1rem; color:#b00020; font-weight:600;">This gift card has expired.</p>
+        {%- elsif gift_card.enabled == false -%}
+          <p style="margin-top:1rem; color:#b00020; font-weight:600;">This gift card has been disabled.</p>
+        {%- endif -%}
+
+        <p style="margin-top:1.5rem; font-size:1.25rem; letter-spacing:0.1em; font-weight:700;">
+          {{ gift_card.code | format_code }}
+        </p>
+
+        {%- if gift_card.pass_url -%}
+          <p style="margin-top:1rem;">
+            <a href="{{ gift_card.pass_url }}"><img src="https://cdn.shopify.com/shopifycloud/shopify/assets/themes_support/wallet-passes/en-e26bcd63e3fddd6da8fe1c1c3e0e0e9d.svg" alt="Add to Apple Wallet" height="40"></a>
+          </p>
+        {%- endif -%}
+
+        <div style="margin-top:2rem;">
+          {{ gift_card.url | qr_code: 120 }}
+        </div>
+
+        <p style="margin-top:2rem;">
+          <a href="{{ shop.url }}" class="gl-btn gl-btn--black">Shop {{ shop.name }} {% render 'icon', name: 'arrow-right' %}</a>
+        </p>
+      </div>
+
+      <p style="margin-top:2rem; font-size:0.8125rem; color: var(--ink-soft);">
+        Use this code at checkout on {{ shop.url }} to redeem your balance.
+      </p>
+    </div>
+  </body>
+</html>

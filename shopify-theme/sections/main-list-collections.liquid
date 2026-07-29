@@ -1,0 +1,25 @@
+<div class="gl-wrap gl-page">
+  <h1 class="gl-display">All Collections</h1>
+  <div class="gl-collections-grid" style="margin-top:2rem;">
+    {%- for collection in collections -%}
+      <a href="{{ collection.url }}" class="gl-cat-tile">
+        {%- if collection.image -%}
+          <img src="{{ collection.image | image_url: width: 600 }}" alt="{{ collection.title | escape }}" loading="lazy">
+        {%- else -%}
+          {{ 'collection-1' | placeholder_svg_tag }}
+        {%- endif -%}
+        <div class="gl-cat-tile__scrim"></div>
+        <div class="gl-cat-tile__row">
+          <h3 class="gl-display">{{ collection.title }}</h3>
+        </div>
+      </a>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "List collections page",
+  "settings": []
+}
+{% endschema %}

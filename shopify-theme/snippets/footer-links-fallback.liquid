@@ -1,0 +1,25 @@
+{%- comment -%}
+  Placeholder footer links matching the original design, used until the
+  matching link_list setting is assigned a real Online Store menu.
+  column: 1 = Shop, 2 = Help, 3 = Company
+{%- endcomment -%}
+{%- case column -%}
+  {%- when 1 -%}
+    <a href="/collections/just-dropped">New In</a>
+    <a href="/collections/t-shirt">T-Shirts</a>
+    <a href="/collections/baggy-jeans">Baggy Jeans</a>
+    <a href="/collections/hoodies">Hoodies</a>
+    <a href="{{ routes.all_products_collection_url }}">Shop All</a>
+  {%- when 2 -%}
+    <a href="#">Shipping</a>
+    <a href="#">Returns</a>
+    <a href="#">Size Guide</a>
+    <a href="#">Contact</a>
+    <a href="#">FAQ</a>
+  {%- when 3 -%}
+    <a href="/blogs/news">Our Story</a>
+    <a href="/blogs/news">Journal</a>
+    <a href="#">Wholesale</a>
+    <a href="https://instagram.com/gearlockerla">Instagram</a>
+    <a href="https://tiktok.com/@gearlockerla">TikTok</a>
+{%- endcase -%}

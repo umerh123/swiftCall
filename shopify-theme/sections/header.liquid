@@ -1,0 +1,102 @@
+{%- liquid
+  assign menu = section.settings.menu
+  assign use_fallback_nav = false
+  if menu == blank or menu.links.size <= 1
+    assign use_fallback_nav = true
+  endif
+-%}
+<header class="gl-header">
+  <div class="gl-wrap">
+    <div class="gl-header__row">
+      <button type="button" class="gl-header__menu-btn" data-gl-menu-toggle aria-label="Menu" aria-expanded="false">
+        {% render 'icon', name: 'menu' %}
+      </button>
+
+      <a href="{{ routes.root_url }}" class="gl-header__logo">
+        {%- if section.settings.logo != blank -%}
+          <img
+            src="{{ section.settings.logo | image_url: width: 96 }}"
+            width="48" height="48"
+            alt="{{ shop.name }}"
+            loading="eager"
+          >
+        {%- else -%}
+          {{ 'gl-logo.svg' | asset_url | img_tag: shop.name }}
+        {%- endif -%}
+        {%- if section.settings.show_wordmark -%}
+          <span class="gl-header__wordmark">{{ section.settings.wordmark | default: shop.name }}<span class="gl-dot">.</span></span>
+        {%- endif -%}
+      </a>
+
+      <nav class="gl-header__nav" aria-label="Primary">
+        {%- if use_fallback_nav -%}
+          {%- render 'header-nav-fallback' -%}
+        {%- else -%}
+          {%- for link in menu.links -%}
+            <a href="{{ link.url }}" class="{% if link.title contains 'Sale' %}is-accent{% endif %}">{{ link.title }}</a>
+          {%- endfor -%}
+        {%- endif -%}
+      </nav>
+
+      <div class="gl-header__actions">
+        <a href="{{ routes.search_url }}" class="gl-header__icon-btn" aria-label="Search">
+          {% render 'icon', name: 'search' %}
+        </a>
+        <a href="{{ routes.account_url }}" class="gl-header__icon-btn is-desktop-only" aria-label="Account">
+          {% render 'icon', name: 'user' %}
+        </a>
+        <button type="button" class="gl-header__icon-btn is-desktop-only" aria-label="Wishlist">
+          {% render 'icon', name: 'heart' %}
+        </button>
+        <a href="{{ routes.cart_url }}" class="gl-header__icon-btn" aria-label="Cart">
+          {% render 'icon', name: 'shopping-bag' %}
+          <span class="gl-header__cart-count">{{ cart.item_count }}</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="gl-header__mobile-nav" data-gl-mobile-nav>
+      {%- if use_fallback_nav -%}
+        {%- render 'header-nav-fallback' -%}
+      {%- else -%}
+        {%- for link in menu.links -%}
+          <a href="{{ link.url }}" class="{% if link.title contains 'Sale' %}is-accent{% endif %}">{{ link.title }}</a>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image",
+      "info": "Leave blank to use the placeholder Gear Locker mark shipped with the theme."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wordmark",
+      "label": "Show wordmark next to logo",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "wordmark",
+      "label": "Wordmark text",
+      "default": "Gear Locker"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu",
+      "info": "Create a menu named New In, Crop, T-Shirts, Baggy, Jeans, Hoodies, Shorts, Shop All, Sale in Online Store > Navigation to replace the built-in placeholder links."
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,65 @@
+<section class="gl-editorial">
+  <div class="gl-editorial__grid">
+    <div class="gl-editorial__media">
+      {%- if section.settings.image != blank -%}
+        <img src="{{ section.settings.image | image_url: width: 1200 }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+      {%- else -%}
+        <img src="{{ 'gl-editorial-1.jpg' | asset_url }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+      {%- endif -%}
+    </div>
+    <div class="gl-editorial__copy">
+      <div class="gl-eyebrow">{{ section.settings.eyebrow }}</div>
+      <h2 class="gl-display">{{ section.settings.heading | newline_to_br }}</h2>
+      <p>{{ section.settings.copy }}</p>
+      <div class="gl-editorial__ctas">
+        <a href="{{ section.settings.cta_url }}" class="gl-btn gl-btn--black">
+          {{ section.settings.cta_label }} {% render 'icon', name: 'arrow-right' %}
+        </a>
+      </div>
+      {%- if section.blocks.size > 0 -%}
+        <div class="gl-stats">
+          {%- for block in section.blocks -%}
+            <div {{ block.shopify_attributes }}>
+              <div class="gl-stat__n gl-display">{{ block.settings.number }}</div>
+              <div class="gl-stat__l">{{ block.settings.label }}</div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial split",
+  "tag": "section",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Womens · FW Edit" },
+    { "type": "textarea", "id": "heading", "label": "Heading", "default": "Stacked.\nCropped.\nUnderstood." },
+    { "type": "text", "id": "copy", "label": "Copy", "default": "A tighter, meaner take on downtown streetwear — cropped silhouettes, impossible baggy denim, and finishing pieces from the accessories case." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Shop The Edit" },
+    { "type": "url", "id": "cta_url", "label": "Button link", "default": "/collections/cropped-tees" }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        { "type": "text", "id": "number", "label": "Number", "default": "7k+" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Fits shipped" }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "default": {
+    "settings": {},
+    "blocks": [
+      { "type": "stat", "settings": { "number": "7k+", "label": "Fits shipped" } },
+      { "type": "stat", "settings": { "number": "18", "label": "Weekly drops" } },
+      { "type": "stat", "settings": { "number": "4.9★", "label": "Customer rating" } }
+    ]
+  }
+}
+{% endschema %}

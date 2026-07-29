@@ -1,0 +1,31 @@
+<section class="gl-brandstory">
+  <div class="gl-wrap gl-section gl-brandstory__inner">
+    <div class="gl-eyebrow">{{ section.settings.eyebrow }}</div>
+    <h2 class="gl-display">
+      {{ section.settings.heading | newline_to_br }} <span class="gl-accent">{{ section.settings.accent }}</span> {{ section.settings.heading_end }}
+    </h2>
+    <p>{{ section.settings.copy }}</p>
+    <div class="gl-brandstory__ctas">
+      <a href="{{ section.settings.cta_url }}" class="gl-btn gl-btn--white is-wide">
+        {{ section.settings.cta_label }} {% render 'icon', name: 'arrow-right' %}
+      </a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand story",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Est. 2018 · Downtown LA" },
+    { "type": "textarea", "id": "heading", "label": "Heading (start)", "default": "Fits That Make You" },
+    { "type": "text", "id": "accent", "label": "Accent phrase", "default": "Feel Good" },
+    { "type": "text", "id": "heading_end", "label": "Heading (end)", "default": "— Whatever The Vibe." },
+    { "type": "text", "id": "copy", "label": "Copy", "default": "Gear Locker LA is a Downtown Los Angeles streetwear house pulling from LA, New York and Miami. Fair price points, new drops every week, and a locker full of pieces you'll actually wear." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Read Our Story" },
+    { "type": "url", "id": "cta_url", "label": "Button link", "default": "/blogs/news" }
+  ],
+  "presets": [{ "name": "Brand story" }]
+}
+{% endschema %}

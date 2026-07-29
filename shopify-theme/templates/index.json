@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "hero-slider": { "type": "hero-slider" },
+    "trust-bar": { "type": "trust-bar" },
+    "new-arrivals": { "type": "new-arrivals" },
+    "promo-strip": { "type": "promo-strip" },
+    "shop-by-category": { "type": "shop-by-category" },
+    "editorial-split": { "type": "editorial-split" },
+    "best-sellers": { "type": "best-sellers" },
+    "last-piece": { "type": "last-piece" },
+    "brand-story": { "type": "brand-story" },
+    "newsletter-local-pickup": { "type": "newsletter-local-pickup" }
+  },
+  "order": [
+    "hero-slider",
+    "trust-bar",
+    "new-arrivals",
+    "promo-strip",
+    "shop-by-category",
+    "editorial-split",
+    "best-sellers",
+    "last-piece",
+    "brand-story",
+    "newsletter-local-pickup"
+  ]
+}

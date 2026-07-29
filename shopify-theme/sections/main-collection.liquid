@@ -1,0 +1,53 @@
+{%- paginate collection.products by 24 -%}
+  <div class="gl-wrap gl-page">
+    <div class="gl-page__breadcrumb">
+      <a href="{{ routes.all_products_collection_url }}">Shop</a> / {{ collection.title }}
+    </div>
+
+    <div class="gl-collection__head">
+      <h1 class="gl-display">{{ collection.title }}</h1>
+      {%- if collection.description != blank -%}
+        <div class="gl-collection__desc">{{ collection.description }}</div>
+      {%- endif -%}
+    </div>
+
+    <div class="gl-collection__toolbar">
+      <span>{{ collection.products_count }} products</span>
+    </div>
+
+    {%- if collection.products.size == 0 -%}
+      <div class="gl-empty">This collection is empty right now — check back soon.</div>
+    {%- else -%}
+      <div class="gl-grid-2">
+        {%- for product in collection.products -%}
+          {%- render 'product-card', product: product -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="gl-pagination">
+        {%- if paginate.previous -%}
+          <a href="{{ paginate.previous.url }}">{% render 'icon', name: 'chevron-left' %}</a>
+        {%- endif -%}
+        {%- for part in paginate.parts -%}
+          {%- if part.is_link -%}
+            <a href="{{ part.url }}">{{ part.title }}</a>
+          {%- else -%}
+            <span class="{% if part.title == paginate.current_page %}is-current{% endif %}">{{ part.title }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}
+          <a href="{{ paginate.next.url }}">{% render 'icon', name: 'chevron-right' %}</a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collection page",
+  "settings": []
+}
+{% endschema %}

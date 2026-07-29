@@ -1,0 +1,32 @@
+<div class="gl-wrap gl-page" style="max-width:28rem;">
+  <h1 class="gl-display">Create Account</h1>
+
+  {%- form 'create_customer', style: 'margin-top:2rem;' -%}
+    {%- if form.errors -%}
+      <p style="color:#b00020; margin-bottom:1rem;">{{ form.errors | default_errors }}</p>
+    {%- endif -%}
+
+    <div class="gl-product__option">
+      <label for="RegisterFirstName">First name</label>
+      <input type="text" name="customer[first_name]" id="RegisterFirstName" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="RegisterLastName">Last name</label>
+      <input type="text" name="customer[last_name]" id="RegisterLastName" style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="RegisterEmail">Email</label>
+      <input type="email" name="customer[email]" id="RegisterEmail" required style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+    <div class="gl-product__option">
+      <label for="RegisterPassword">Password</label>
+      <input type="password" name="customer[password]" id="RegisterPassword" required style="width:100%; padding:0.875rem 1rem; border:1px solid var(--border);">
+    </div>
+
+    <button type="submit" class="gl-btn gl-btn--black" style="justify-content:center; width:100%;">Create Account</button>
+  {%- endform -%}
+
+  <p style="margin-top:2rem; font-size:0.875rem;">
+    Already have an account? <a href="{{ routes.account_login_url }}" style="text-decoration:underline;">Sign in</a>
+  </p>
+</div>

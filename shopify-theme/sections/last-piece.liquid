@@ -1,0 +1,51 @@
+<section class="gl-lastpiece">
+  <div class="gl-wrap gl-section">
+    <div class="gl-lastpiece__inner">
+      <div class="gl-lastpiece__grid">
+        <div class="gl-lastpiece__copy">
+          <div class="gl-lastpiece__badge">{{ section.settings.badge }}</div>
+          <h2 class="gl-display">
+            {{ section.settings.heading | newline_to_br }} <span class="gl-accent">{{ section.settings.accent }}</span>
+          </h2>
+          <p>{{ section.settings.copy }}</p>
+          <div class="gl-lastpiece__ctas">
+            <a href="{{ section.settings.cta_url }}" class="gl-btn gl-btn--black">
+              {{ section.settings.cta_label }}
+            </a>
+            {%- if section.settings.secondary_cta_label != blank -%}
+              <a href="{{ section.settings.secondary_cta_url }}" class="gl-btn gl-btn--outline-black">
+                {{ section.settings.secondary_cta_label }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+        <div class="gl-lastpiece__media">
+          {%- if section.settings.image != blank -%}
+            <img src="{{ section.settings.image | image_url: width: 1200 }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+          {%- else -%}
+            <img src="{{ 'gl-editorial-2.jpg' | asset_url }}" alt="{{ section.settings.heading | escape }}" loading="lazy">
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Last piece",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "badge", "label": "Badge", "default": "Last Piece · Always Live" },
+    { "type": "textarea", "id": "heading", "label": "Heading", "default": "One Left.\nThen It's" },
+    { "type": "text", "id": "accent", "label": "Accent word", "default": "Gone." },
+    { "type": "text", "id": "copy", "label": "Copy", "default": "Tees from $15. Bottoms from $35. When it sells out — it doesn't come back." },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Tops from $15" },
+    { "type": "url", "id": "cta_url", "label": "Button link", "default": "/collections/last-piece-tops-crops-hoodies-crewnecks-jackets-long-sleeves" },
+    { "type": "text", "id": "secondary_cta_label", "label": "Secondary button label", "default": "Bottoms from $35" },
+    { "type": "url", "id": "secondary_cta_url", "label": "Secondary button link", "default": "/collections/last-piece-bottoms" },
+    { "type": "image_picker", "id": "image", "label": "Image" }
+  ],
+  "presets": [{ "name": "Last piece" }]
+}
+{% endschema %}

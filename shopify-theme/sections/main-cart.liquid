@@ -1,0 +1,70 @@
+<div class="gl-wrap gl-page">
+  <h1 class="gl-display">Your Cart</h1>
+
+  {%- if cart.item_count == 0 -%}
+    <div class="gl-empty">
+      <p>Your cart is empty.</p>
+      <p style="margin-top:1.5rem;">
+        <a href="{{ routes.all_products_collection_url }}" class="gl-btn gl-btn--black">
+          Continue Shopping {% render 'icon', name: 'arrow-right' %}
+        </a>
+      </p>
+    </div>
+  {%- else -%}
+    {%- form 'cart', cart -%}
+      <table class="gl-cart-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for item in cart.items -%}
+            <tr>
+              <td>
+                <div class="gl-cart-line">
+                  {%- if item.image -%}
+                    <img src="{{ item.image | image_url: width: 200 }}" alt="{{ item.title | escape }}">
+                  {%- endif -%}
+                  <div>
+                    <div class="gl-cart-line__title">{{ item.product.title }}</div>
+                    {%- unless item.variant.title == 'Default Title' -%}
+                      <div class="gl-cart-line__variant">{{ item.variant.title }}</div>
+                    {%- endunless -%}
+                    <div class="gl-cart-line__variant">{{ item.final_price | money }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <input class="gl-cart-qty" type="number" min="0" name="updates[]" value="{{ item.quantity }}" data-line="{{ forloop.index }}">
+              </td>
+              <td>{{ item.final_line_price | money }}</td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
+
+      <div class="gl-cart-summary">
+        <div class="gl-cart-summary__row">
+          <span>Subtotal</span>
+          <span>{{ cart.total_price | money }}</span>
+        </div>
+        <button type="submit" name="update" class="gl-btn gl-btn--outline-black" style="margin-bottom: 0.75rem;">
+          Update Cart
+        </button>
+        <button type="submit" name="checkout" class="gl-btn gl-btn--black">
+          Checkout {% render 'icon', name: 'arrow-right' %}
+        </button>
+      </div>
+    {%- endform -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Cart page",
+  "settings": []
+}
+{% endschema %}

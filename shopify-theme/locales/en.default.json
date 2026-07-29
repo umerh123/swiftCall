@@ -1,0 +1,61 @@
+{
+  "general": {
+    "search": {
+      "placeholder": "Search",
+      "submit": "Search",
+      "no_results_html": "No results found for \"{{ terms }}\". Check the spelling or use a different word."
+    },
+    "404": {
+      "title": "Page not found",
+      "subtext": "The page you're looking for doesn't exist or has been moved.",
+      "link": "Continue shopping"
+    },
+    "password_page": {
+      "opening_soon": "Opening soon",
+      "enter_password": "Enter using password"
+    }
+  },
+  "products": {
+    "product": {
+      "sold_out": "Sold out",
+      "on_sale": "Sale",
+      "add_to_cart": "Add to cart",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your cart",
+      "empty": "Your cart is empty",
+      "continue_shopping": "Continue shopping",
+      "subtotal": "Subtotal",
+      "checkout": "Check out",
+      "remove": "Remove"
+    }
+  },
+  "customer": {
+    "account": {
+      "title": "Account",
+      "details": "Account details",
+      "view_addresses": "View addresses",
+      "return": "Return to Account details"
+    },
+    "login_page": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "sign_in": "Sign in",
+      "forgot_password": "Forgot your password?",
+      "create_account": "Create account"
+    },
+    "orders": {
+      "title": "Order history"
+    }
+  },
+  "blogs": {
+    "article": {
+      "back_to_blog": "Back to"
+    }
+  }
+}

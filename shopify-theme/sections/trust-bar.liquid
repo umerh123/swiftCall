@@ -1,0 +1,48 @@
+<div class="gl-trust">
+  <div class="gl-wrap gl-trust__grid">
+    {%- for block in section.blocks -%}
+      <div class="gl-trust__item" {{ block.shopify_attributes }}>
+        {% render 'icon', name: block.settings.icon %}
+        <span>{{ block.settings.label }}</span>
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Trust bar",
+  "tag": "div",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "truck", "label": "Truck" },
+            { "value": "refresh-ccw", "label": "Refresh" },
+            { "value": "shield-check", "label": "Shield" },
+            { "value": "sparkles", "label": "Sparkles" },
+            { "value": "heart", "label": "Heart" }
+          ],
+          "default": "truck"
+        },
+        { "type": "text", "id": "label", "label": "Label", "default": "Free Shipping $100+" }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      { "type": "item", "settings": { "icon": "truck", "label": "Free Shipping $100+" } },
+      { "type": "item", "settings": { "icon": "refresh-ccw", "label": "Easy 14-Day Returns" } },
+      { "type": "item", "settings": { "icon": "shield-check", "label": "Klarna · Afterpay · Shop Pay" } },
+      { "type": "item", "settings": { "icon": "sparkles", "label": "New Drops Every Week" } }
+    ]
+  }
+}
+{% endschema %}

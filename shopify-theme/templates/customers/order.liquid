@@ -1,0 +1,35 @@
+<div class="gl-wrap gl-page">
+  <div class="gl-page__breadcrumb">
+    <a href="{{ routes.account_url }}">My Account</a> / Order {{ order.name }}
+  </div>
+  <h1 class="gl-display">Order {{ order.name }}</h1>
+  <p style="color:var(--ink-soft); margin-top:0.5rem;">Placed on {{ order.created_at | date: "%B %d, %Y" }}</p>
+
+  <table class="gl-cart-table" style="margin-top:2rem;">
+    <thead>
+      <tr><th>Product</th><th>Quantity</th><th>Price</th></tr>
+    </thead>
+    <tbody>
+      {%- for line_item in order.line_items -%}
+        <tr>
+          <td>
+            <div class="gl-cart-line">
+              {%- if line_item.image -%}
+                <img src="{{ line_item.image | image_url: width: 200 }}" alt="{{ line_item.title | escape }}">
+              {%- endif -%}
+              <div>
+                <div class="gl-cart-line__title">{{ line_item.title }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ line_item.quantity }}</td>
+          <td>{{ line_item.final_line_price | money }}</td>
+        </tr>
+      {%- endfor -%}
+    </tbody>
+  </table>
+
+  <div class="gl-cart-summary">
+    <div class="gl-cart-summary__row"><span>Total</span><span>{{ order.total_price | money }}</span></div>
+  </div>
+</div>

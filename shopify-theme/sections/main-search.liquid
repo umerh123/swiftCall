@@ -1,0 +1,36 @@
+<div class="gl-wrap gl-page">
+  <h1 class="gl-display">Search</h1>
+
+  <form action="{{ routes.search_url }}" method="get" role="search" class="gl-search-form">
+    <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Search products" aria-label="Search">
+    <input type="hidden" name="type" value="product">
+    <button type="submit">{% render 'icon', name: 'search' %}</button>
+  </form>
+
+  {%- if search.performed -%}
+    {%- if search.results_count == 0 -%}
+      <div class="gl-empty">No results found for "{{ search.terms }}".</div>
+    {%- else -%}
+      <div class="gl-grid-2">
+        {%- for item in search.results -%}
+          {%- if item.object_type == 'product' -%}
+            {%- render 'product-card', product: item -%}
+          {%- else -%}
+            <a href="{{ item.url }}" class="gl-card">
+              <div class="gl-card__meta">
+                <h3 class="gl-card__name">{{ item.title }}</h3>
+              </div>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Search page",
+  "settings": []
+}
+{% endschema %}
