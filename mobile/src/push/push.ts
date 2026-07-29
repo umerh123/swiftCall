@@ -1,5 +1,6 @@
 import { PermissionsAndroid, Platform } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import crashlytics from '@react-native-firebase/crashlytics';
 import { registerPushToken, unregisterPushToken } from '../api/client';
 
 /** Android 13+ requires this at runtime or no notification (call or SMS)
@@ -26,7 +27,17 @@ export async function requestMicrophonePermission(): Promise<void> {
 export async function getFcmToken(): Promise<string | null> {
   try {
     const token = await messaging().getToken();
-    if (token) await registerPushToken(token).catch(() => {});
+    if (token) {
+      await registerPushToken(token).catch((e) => {
+        // Swallowed on purpose — a bad SMS-push registration shouldn't
+        // block calling — but recorded so a "no SMS notifications" report
+        // is diagnosable without another round-trip.
+        console.warn('registerPushToken failed:', e);
+        try {
+          crashlytics().recordError(e instanceof Error ? e : new Error(String(e)));
+        } catch {}
+      });
+    }
     return token;
   } catch {
     return null;

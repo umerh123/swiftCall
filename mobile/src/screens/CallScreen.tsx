@@ -9,6 +9,7 @@ import Icon from '../components/Icon';
 import { TelnyxCallState } from '@telnyx/react-voice-commons-sdk';
 import { useActiveCall } from '../voip/hooks';
 import { logCall } from '../api/client';
+import CallUtils from '../native/CallUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Call'>;
 
@@ -44,13 +45,24 @@ export default function CallScreen({ navigation }: Props) {
       call.isMuted$.subscribe(setMuted),
       call.isHeld$.subscribe(setHeld),
       call.callState$.subscribe((state) => {
+        // Real phones dim the screen near your ear only once you're
+        // actually talking or the far end is being reached — not while an
+        // incoming call's accept/decline buttons still need to be visible.
+        if (state === TelnyxCallState.ACTIVE || state === TelnyxCallState.CONNECTING) {
+          CallUtils.acquireProximityWakeLock();
+        } else {
+          CallUtils.releaseProximityWakeLock();
+        }
         if (state === TelnyxCallState.ENDED || state === TelnyxCallState.FAILED || state === TelnyxCallState.DROPPED) {
           logCall(call.destination, call.isIncoming ? 'inbound' : 'outbound', state.toLowerCase(), call.currentDuration).catch(() => {});
           setTimeout(() => navigation.goBack(), 600);
         }
       }),
     ];
-    return () => subs.forEach((s) => s.unsubscribe());
+    return () => {
+      subs.forEach((s) => s.unsubscribe());
+      CallUtils.releaseProximityWakeLock();
+    };
   }, [call]);
 
   if (!call) return null;

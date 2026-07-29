@@ -14,6 +14,7 @@ import { watchTokenRefresh } from './src/push/push';
 import { getToken } from './src/storage/settings';
 import { colors } from './src/theme';
 import ErrorBoundary from './src/ErrorBoundary';
+import { startRingGuard } from './src/voip/ringGuard';
 
 enableScreens();
 
@@ -28,6 +29,7 @@ function App() {
       }
     });
     const unwatch = watchTokenRefresh();
+    const stopRingGuard = startRingGuard();
 
     // TelnyxVoiceApp's own auto-reconnect is disabled below (it and our
     // bootVoip() both calling voipClient.login() at once is exactly the
@@ -45,6 +47,7 @@ function App() {
     return () => {
       sub.unsubscribe();
       unwatch();
+      stopRingGuard();
       appStateSub.remove();
     };
   }, []);

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Animated, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Animated, Easing, Pressable } from 'react-native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -11,6 +11,8 @@ import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
 import { voipClient } from '../voip/client';
 import { useConnectionState } from '../voip/hooks';
 import { bootVoip, getLastVoipError } from '../voip/boot';
+import { normalizePhoneNumber } from '../utils/phone';
+import CallUtils from '../native/CallUtils';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Dialer'>,
@@ -59,6 +61,21 @@ function PulsingDot({ color }: { color: string }) {
   );
 }
 
+function DialKey({ num, letters, onPress, onLongPress }: { num: string; letters: string; onPress: () => void; onLongPress?: () => void }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const pressIn = () => Animated.spring(scale, { toValue: 0.9, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 18, bounciness: 9 }).start();
+
+  return (
+    <Pressable style={styles.keyWrap} onPress={onPress} onLongPress={onLongPress} onPressIn={pressIn} onPressOut={pressOut}>
+      <Animated.View style={[styles.key, { transform: [{ scale }] }]}>
+        <Text style={styles.keyNum}>{num}</Text>
+        <Text style={styles.keyLetters}>{letters || ' '}</Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 export default function DialerScreen({ navigation }: Props) {
   const [digits, setDigits] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +99,7 @@ export default function DialerScreen({ navigation }: Props) {
   }
 
   async function call() {
-    const dest = digits.trim();
+    const dest = normalizePhoneNumber(digits);
     if (!dest) return;
     if (!connected) {
       Alert.alert('Not connected', 'Your calling line is still connecting — try again in a moment.');
@@ -155,16 +172,16 @@ export default function DialerScreen({ navigation }: Props) {
 
       <View style={styles.pad}>
         {KEYS.map(([num, letters]) => (
-          <TouchableOpacity
+          <DialKey
             key={num}
-            style={styles.key}
-            activeOpacity={0.55}
-            onPress={() => setDigits((d) => d + num)}
+            num={num}
+            letters={letters}
+            onPress={() => {
+              CallUtils.playDtmfTone(num);
+              setDigits((d) => d + num);
+            }}
             onLongPress={() => num === '0' && setDigits((d) => d + '+')}
-          >
-            <Text style={styles.keyNum}>{num}</Text>
-            <Text style={styles.keyLetters}>{letters || ' '}</Text>
-          </TouchableOpacity>
+          />
         ))}
       </View>
 
@@ -249,17 +266,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     marginTop: 4,
   },
-  key: {
+  keyWrap: {
     width: '27%',
     aspectRatio: 1,
     margin: '3%',
+    maxHeight: 72,
+  },
+  key: {
+    flex: 1,
     borderRadius: radius.xxl,
     backgroundColor: colors.panel,
     borderWidth: 1,
     borderColor: colors.lineSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    maxHeight: 72,
   },
   keyNum: { fontSize: 24, color: colors.text, fontWeight: '500' },
   keyLetters: { fontSize: 9.5, color: colors.textFaint, letterSpacing: 1.8, marginTop: 3 },
