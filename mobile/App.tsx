@@ -16,6 +16,7 @@ import { colors } from './src/theme';
 import ErrorBoundary from './src/ErrorBoundary';
 import { startRingGuard } from './src/voip/ringGuard';
 import CallUtils from './src/native/CallUtils';
+import { onPushProcessingStarted, onPushProcessingCompleted, watchConnectionAndCallState } from './src/voip/pushCallDiagnostics';
 
 enableScreens();
 
@@ -31,6 +32,7 @@ function App() {
     });
     const unwatch = watchTokenRefresh();
     const stopRingGuard = startRingGuard();
+    const stopDiagnostics = watchConnectionAndCallState();
 
     // Android 14+ silently downgrades incoming-call notifications to a
     // normal heads-up banner instead of waking the screen unless this is
@@ -71,6 +73,7 @@ function App() {
       sub.unsubscribe();
       unwatch();
       stopRingGuard();
+      stopDiagnostics();
       appStateSub.remove();
     };
   }, []);
@@ -80,7 +83,13 @@ function App() {
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
         <SafeAreaProvider>
           <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
-          <TelnyxVoiceApp voipClient={voipClient} enableAutoReconnect={false} debug={__DEV__}>
+          <TelnyxVoiceApp
+            voipClient={voipClient}
+            enableAutoReconnect={false}
+            debug={__DEV__}
+            onPushNotificationProcessingStarted={onPushProcessingStarted}
+            onPushNotificationProcessingCompleted={onPushProcessingCompleted}
+          >
             <NavigationContainer ref={navigationRef}>
               <RootNavigator />
             </NavigationContainer>

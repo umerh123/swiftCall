@@ -15,10 +15,11 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { colors, radius, shadow } from '../theme';
 import Icon from '../components/Icon';
-import { TelnyxVoipClient } from '@telnyx/react-voice-commons-sdk';
+import { TelnyxConnectionState, TelnyxVoipClient } from '@telnyx/react-voice-commons-sdk';
 import * as api from '../api/client';
 import { getServerUrl, setServerUrl, setToken, setUser, getUser, getToken } from '../storage/settings';
 import { bootVoip } from '../voip/boot';
+import { voipClient } from '../voip/client';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -41,6 +42,21 @@ export default function LoginScreen({ navigation }: Props) {
         const launchedFromPush = await TelnyxVoipClient.isLaunchedFromPushNotification();
         if (!launchedFromPush) {
           await bootVoip();
+        } else {
+          // The native-side push login is entirely internal to the SDK and
+          // has no visible failure signal on our end — if it silently
+          // doesn't pan out, this is the fallback that gets the line
+          // connected anyway, even though the ring that triggered this
+          // launch will already be gone by then.
+          setTimeout(() => {
+            if (
+              voipClient.currentConnectionState !== TelnyxConnectionState.CONNECTED &&
+              voipClient.currentConnectionState !== TelnyxConnectionState.CONNECTING &&
+              !voipClient.currentActiveCall
+            ) {
+              bootVoip();
+            }
+          }, 5000);
         }
         navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         return;
