@@ -14,6 +14,7 @@ import * as api from '../api/client';
 import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
 import { normalizePhoneNumber } from '../utils/phone';
+import { getCallerNumber } from '../voip/callerId';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Recents'>,
@@ -57,7 +58,8 @@ export default function CallLogScreen({ navigation }: Props) {
       return;
     }
     try {
-      await voipClient.newCall(normalizePhoneNumber(phone));
+      const myNumber = getCallerNumber();
+      await voipClient.newCall(normalizePhoneNumber(phone), undefined, myNumber || undefined);
       navigation.navigate('Call');
     } catch (e: any) {
       Alert.alert('Could not call', e?.message || 'Something went wrong.');

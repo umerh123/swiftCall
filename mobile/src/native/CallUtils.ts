@@ -3,6 +3,7 @@ import { NativeModules, Platform } from 'react-native';
 type CallUtilsModule = {
   playDtmfTone(digit: string): void;
   stopRingtone(): void;
+  dismissIncomingCallNotification(): void;
   hasFullScreenIntentPermission(): Promise<boolean>;
   openFullScreenIntentSettings(): void;
   acquireProximityWakeLock(): void;
@@ -21,6 +22,7 @@ const CallUtils: CallUtilsModule =
     : {
         playDtmfTone: noop,
         stopRingtone: noop,
+        dismissIncomingCallNotification: noop,
         hasFullScreenIntentPermission: async () => true,
         openFullScreenIntentSettings: noop,
         acquireProximityWakeLock: noop,

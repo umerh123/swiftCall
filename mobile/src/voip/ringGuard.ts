@@ -18,12 +18,14 @@ export function startRingGuard(): () => void {
       // No ringing/connecting/active/held call left to track — whatever
       // was ringing is over one way or another.
       CallUtils.stopRingtone();
+      CallUtils.dismissIncomingCallNotification();
       return;
     }
 
     callStateSub = call.callState$.subscribe((state) => {
       if (state !== TelnyxCallState.RINGING) {
         CallUtils.stopRingtone();
+        CallUtils.dismissIncomingCallNotification();
       }
     });
   });

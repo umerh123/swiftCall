@@ -1,6 +1,7 @@
 import crashlytics from '@react-native-firebase/crashlytics';
 import { getFcmToken, requestMicrophonePermission, requestNotificationPermission } from '../push/push';
 import { loginToVoip } from './client';
+import { loadCallerNumber } from './callerId';
 
 let inFlight: Promise<void> | null = null;
 let lastError: string | null = null;
@@ -37,6 +38,8 @@ export async function bootVoip(): Promise<void> {
   if (inFlight) return inFlight;
   inFlight = (async () => {
     try {
+      step('loading caller number');
+      await loadCallerNumber();
       step('requesting notification permission');
       await requestNotificationPermission();
       step('requesting microphone permission');

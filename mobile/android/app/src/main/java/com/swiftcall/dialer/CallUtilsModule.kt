@@ -13,6 +13,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.telnyx.react_voice_commons.TelnyxNotificationHelper
 
 /**
  * Small grab-bag of native calling behaviours the JS side can't reach on
@@ -61,6 +62,19 @@ class CallUtilsModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     fun stopRingtone() {
         RingtonePlayer.stop()
+    }
+
+    // The ringtone and the visual incoming-call notification are two
+    // separate things the SDK leaves running independently — a call that
+    // ends before it's answered or declined through the notification's own
+    // actions (e.g. the caller cancels) stops neither on its own, so the
+    // banner is left stuck reading "Incoming Call" indefinitely.
+    @ReactMethod
+    fun dismissIncomingCallNotification() {
+        try {
+            TelnyxNotificationHelper.hideNotificationFromContext(reactApplicationContext)
+        } catch (_: Exception) {
+        }
     }
 
     @ReactMethod

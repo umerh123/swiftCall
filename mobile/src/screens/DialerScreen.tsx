@@ -13,6 +13,7 @@ import { useConnectionState } from '../voip/hooks';
 import { bootVoip, getLastVoipError } from '../voip/boot';
 import { normalizePhoneNumber } from '../utils/phone';
 import CallUtils from '../native/CallUtils';
+import { getCallerNumber } from '../voip/callerId';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Dialer'>,
@@ -106,7 +107,8 @@ export default function DialerScreen({ navigation }: Props) {
       return;
     }
     try {
-      await voipClient.newCall(dest);
+      const myNumber = getCallerNumber();
+      await voipClient.newCall(dest, undefined, myNumber || undefined);
       navigation.navigate('Call');
     } catch (e: any) {
       Alert.alert('Could not call', e?.message || 'Something went wrong.');
