@@ -1,5 +1,7 @@
 import crashlytics from '@react-native-firebase/crashlytics';
+import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
 import { voipClient } from './client';
+import { bootVoip } from './boot';
 
 /** The push-launched "cold start, tap the notification, land on the call
  *  screen" path is entirely internal to TelnyxVoiceApp/SessionManager (see
@@ -43,6 +45,17 @@ export function onPushProcessingCompleted(): void {
 export function watchConnectionAndCallState(): () => void {
   const connSub = voipClient.connectionState$.subscribe((state) => {
     log(`connectionState -> ${state}`);
+
+    // Confirmed via Crashlytics: TelnyxVoiceApp's own push-triggered login
+    // (SessionManager._connect, entirely vendor code) can throw before it
+    // ever creates a call, landing here in ERROR almost immediately rather
+    // than actually retrying. Reacting to that directly — instead of
+    // waiting on a blind fixed timer — gives the fastest possible shot at
+    // reconnecting the line while the caller is still on the line.
+    if (state === TelnyxConnectionState.ERROR && !voipClient.currentActiveCall) {
+      log('connectionState went ERROR with no active call — retrying via bootVoip()');
+      bootVoip();
+    }
   });
   const callSub = voipClient.activeCall$.subscribe((call) => {
     log(`activeCall$ -> ${call ? `${call.callId} (${call.currentState})` : 'null'}`);
