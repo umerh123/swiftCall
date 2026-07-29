@@ -110,7 +110,12 @@ export default function CallScreen({ navigation }: Props) {
             <TouchableOpacity
               style={[styles.roundBtn, styles.accept]}
               activeOpacity={0.85}
-              onPress={() => call.answer().catch(() => {})}
+              onPress={() => {
+                // Same ordering fix as outbound calls: must be set before
+                // answer() opens the mic stream, not after.
+                CallUtils.setCallAudioMode();
+                call.answer().catch(() => {});
+              }}
             >
               <Icon name="phone" size={26} color="#fff" />
             </TouchableOpacity>

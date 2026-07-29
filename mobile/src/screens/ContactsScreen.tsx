@@ -15,6 +15,7 @@ import { voipClient } from '../voip/client';
 import { TelnyxConnectionState } from '@telnyx/react-voice-commons-sdk';
 import { normalizePhoneNumber } from '../utils/phone';
 import { getCallerNumber } from '../voip/callerId';
+import CallUtils from '../native/CallUtils';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, 'Contacts'>,
@@ -86,6 +87,7 @@ export default function ContactsScreen({ navigation }: Props) {
       return;
     }
     try {
+      CallUtils.setCallAudioMode();
       const myNumber = getCallerNumber();
       await voipClient.newCall(normalizePhoneNumber(c.phone), undefined, myNumber || undefined);
       navigation.navigate('Call');

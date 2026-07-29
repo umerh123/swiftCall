@@ -107,6 +107,10 @@ export default function DialerScreen({ navigation }: Props) {
       return;
     }
     try {
+      // Must happen before newCall() starts capturing audio, not after —
+      // Android decides whether to engage the hardware echo canceller when
+      // the mic stream opens, not retroactively once it's already running.
+      CallUtils.setCallAudioMode();
       const myNumber = getCallerNumber();
       await voipClient.newCall(dest, undefined, myNumber || undefined);
       navigation.navigate('Call');

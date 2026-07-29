@@ -20,10 +20,6 @@ import * as api from '../api/client';
 import { getServerUrl, setServerUrl, setToken, setUser, getUser, getToken } from '../storage/settings';
 import { bootVoip } from '../voip/boot';
 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
@@ -38,22 +34,16 @@ export default function LoginScreen({ navigation }: Props) {
       const [url, token, user] = await Promise.all([getServerUrl(), getToken(), getUser()]);
       if (url) setServerUrlField(url);
       if (token && user) {
-        // Telnyx's SDK has its own internal push-launch login path
-        // (TelnyxVoiceApp -> SessionManager.handlePushNotification, on a
-        // fixed ~100ms timer) that's meant to make bootVoip() unnecessary
-        // here — but Crashlytics confirmed it throws before ever creating
-        // a client ("Cannot read property 'TelnyxRTC' of undefined") and
-        // never retries, which is why a push-launched cold start was
-        // landing on the dial pad with no ring at all. bootVoip() reliably
-        // reaches "Line ready" every other time it's used, so it's now the
-        // real login path here too — a brief delay first (rather than
-        // running it at the exact same moment) avoids both of them
-        // mutating the same SessionManager concurrently, which is the
-        // literal "double login" crash this used to skip around; by the
-        // time this fires the vendor path has already thrown and given up.
+        // A push-launched cold start is handled entirely by
+        // pushCallRecovery.ts (started from App.tsx, before this even
+        // resolves) instead of here — it needs to be the ONLY thing that
+        // logs in for that case. A client created by bootVoip() first
+        // would take priority and permanently block the call this launch
+        // was for from ever being delivered (see that file for why).
         const launchedFromPush = await TelnyxVoipClient.isLaunchedFromPushNotification();
-        if (launchedFromPush) await wait(700);
-        await bootVoip();
+        if (!launchedFromPush) {
+          await bootVoip();
+        }
         navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         return;
       }
